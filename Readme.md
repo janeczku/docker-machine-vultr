@@ -8,46 +8,51 @@ parent="smn_machine_drivers"
 +++
 <![end-metadata]-->
 
-# Vultr driver plugin for Docker Machine
+# Docker Machine driver plugin for Vultr
 
-Requires [Docker Machine](https://github.com/docker/machine)!
+This plugin adds support for [Vultr](https://www.vultr.com/) cloud instances to the `docker-machine` command line tool.
 
-This plugin let's you create machines on the [Vultr](https://www.vultr.com/) cloud.
+[![CircleCI](https://img.shields.io/circleci/project/janeczku/docker-machine-vultr.svg)](https://circleci.com/gh/janeczku/docker-machine-vultr/)
 
 ## Installation
 
-Todo.
+Requirement: [Docker Machine](https://github.com/docker/machine)
+
+Download the `docker-machine-vultr` binary from the release page.
+Extract the archive and copy the binary to a folder located in your `PATH` and make sure it's executable (e.g. `chmod +x /usr/local/bin/docker-machine-vultr`).
 
 ## Usage instructions
 
-Get your API key from the [Vultr control panel](https://my.vultr.com/settings/) and pass
-that to `docker-machine create` with the `--vultr-api-key` option.
+Grab your API key from the [Vultr control panel](https://my.vultr.com/settings/) and pass that to `docker-machine create` with the `--vultr-api-key` option.
 
-    $ docker-machine create --driver vultr --vultr-api-key=aa9399a2175a93b17b1c86c807e08d3fc4b test-vps
+    $ docker-machine create --driver vultr --vultr-api-key=aa11bb22cc33 test-vps
 
-Options:
+Command line flags:
 
  - `--vultr-api-key`: **required** Your Vultr API key.
- - `--vultr-os-id`: Operating system ID (OSID) to use. See [API OS endpoint](https://www.vultr.com/api/#os_os_list).
- - `--vultr-region-id`: ID of the region to create the VPS in. See [API Region endpoint](https://www.vultr.com/api/#regions_region_list).
- - `--vultr-plan-id`: Plan ID (VPSPLANID).
- - `--vultr-ipv6`: Enable IPv6 support for the VPS.
+ - `--vultr-os-id`: Operating system ID to use (OSID). See [available OS IDs](https://www.vultr.com/api/#os_os_list).
+ - `--vultr-region-id`: Region the VPS will be created in (DCID). See [available Region IDs](https://www.vultr.com/api/#regions_region_list).
+ - `--vultr-plan-id`: Plan to use for this VPS (VPSPLANID). See [available Plan IDs](https://www.vultr.com/api/#plans_plan_list).
+ - `--vultr-ipv6`: Enable IPv6 support for the VPS. 
  - `--vultr-private-networking`: Enable private networking support for the VPS.
  - `--vultr-backups`: Enable automatic backups for the VPS.
 
-The Vultr driver uses OS ID `160` (Ubuntu 14.04 x64) by default.     
-Since the deployment of an Ubuntu machine on Vultr can take several minutes, you can alternatively do an iPXE-based deployment of [RancherOS](http://rancher.com/rancher-os/) by supplying the following flag:
+      
+#### Recommendation
+By default the driver will provision new VPS with an Ubuntu 14.04 x64 installation. Be aware that the deployment of Ubuntu instances on Vultr can take several minutes.
+If you need faster ETAs for your machines i recommend to use [RancherOS](http://rancher.com/rancher-os/) as operating system by choosing `OSID` `159`. This will install the latest stable version of RancherOS via iPXE and should not take more than 30 seconds:
 
     --vultr-os-id=159
 
  Environment variables and default values:
 
-| CLI option                      | Environment variable         | Default            |
-|---------------------------------|------------------------------|--------------------|
-| **`--vultr-api-key`**           | `VULTR_API_KEY`              | -                  |
-| `--vultr-os-id`                 | `VULTR_OS`                   | *Ubuntu 14.04 x64* |
-| `--vultr-region-id`             | `VULTR_REGION`               | *New Jersey*       |
-| `--vultr-plan-id`               | `VULTR_PLAN`                 | *768 MB RAM*       |
-| `--vultr-ipv6`                  | `VULTR_IPV6`                 | `false`            |
-| `--vultr-private-networking`    | `VULTR_PRIVATE_NETWORKING`   | `false`            |
-| `--vultr-backups`               | `VULTR_BACKUPS`              | `false`            |
+| CLI option                      | Environment variable         | Default                |
+|---------------------------------|------------------------------|------------------------|
+| **`--vultr-api-key`**           | `VULTR_API_KEY`              | -                      |
+| `--vultr-os-id`                 | `VULTR_OS`                   | 160 *Ubuntu 14.04 x64* |
+| `--vultr-region-id`             | `VULTR_REGION`               | 1 *New Jersey*         |
+| `--vultr-plan-id`               | `VULTR_PLAN`                 | 29 *768 MB RAM*        |
+| `--vultr-ipv6`                  | `VULTR_IPV6`                 | `false`                |
+| `--vultr-private-networking`    | `VULTR_PRIVATE_NETWORKING`   | `false`                |
+| `--vultr-backups`               | `VULTR_BACKUPS`              | `false`                |
+     
