@@ -46,9 +46,9 @@ get-deps:
 	go get golang.org/x/crypto/ssh
 	go get golang.org/x/crypto/ssh/terminal
 	go get github.com/Azure/go-ansiterm
-	go get github.com/Azure/go-ansiterm/winterm
+	#go get github.com/Azure/go-ansiterm/winterm
 	go get github.com/Sirupsen/logrus
-	go get github.com/docker/docker/pkg/term/windows
+	#go get github.com/docker/docker/pkg/term/windows
 
 check-gofmt:
 	if [ -n "$(shell gofmt -l .)" ]; then \
