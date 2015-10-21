@@ -1,0 +1,5 @@
+docker-machine-vultr
+build
+dist
+release
+*.gz
