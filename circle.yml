@@ -6,8 +6,8 @@ machine:
 dependencies:
   pre:
     - go version
-    - mkdir -p $GOPATH/src/github.com/janeczku/docker-machine-vultr
-    - cp -r $(pwd)/ $GOPATH/src/github.com/janeczku/docker-machine-vultr
+    - test -d /home/ubuntu/.go_workspace/src/github.com/janeczku/ || mkdir -p /home/ubuntu/.go_workspace/src/github.com/janeczku/
+    - test -e /home/ubuntu/.go_workspace/src/github.com/janeczku/docker-machine-vultr || ln -s /home/ubuntu/docker-machine-vultr/ /home/ubuntu/.go_workspace/src/github.com/janeczku/
   override:
     - make get-deps
     - make build

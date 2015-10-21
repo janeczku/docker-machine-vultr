@@ -29,7 +29,7 @@ dist: dist-clean
 	mkdir -p dist/windows/amd64 && CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -ldflags "$(LDFLAGS)" -o dist/windows/amd64/$(NAME).exe ./bin 
 
 release: dist
-	glock sync -n < GLOCKFILE
+	#glock sync -n < GLOCKFILE
 	mkdir -p release
 	tar -cvzf release/$(NAME)-$(VERSION)-linux-amd64.tar.gz -C dist/linux/amd64 $(NAME)
 	tar -cvzf release/$(NAME)-$(VERSION)-linux-armhf.tar.gz -C dist/linux/armhf $(NAME)
@@ -40,7 +40,14 @@ release: dist
 get-deps:
 	go get github.com/robfig/glock
 	go get github.com/tcnksm/ghr
-	glock sync -n < GLOCKFILE
+	go get github.com/tools/godep
+	go get github.com/ChimeraCoder/tokenbucket
+	go get github.com/JamesClonk/vultr
+	go get github.com/docker/machine
+	go get github.com/docker/docker/pkg/term
+	go get golang.org/x/crypto/ssh
+	go get golang.org/x/crypto/ssh/terminal
+	#glock sync -n < GLOCKFILE
 	#go get -d -t ./bin
 
 check-gofmt:
