@@ -1,6 +1,13 @@
+machine:
+  environment:
+    GOPATH: /home/ubuntu:$GOPATH
+    SRCDIR: /home/ubuntu$GOPATH/src/github.com/janeczku/docker-machine-vultr
+
 dependencies:
   pre:
     - go version
+    - mkdir -p $GOPATH/src/github.com/janeczku/docker-machine-vultr
+    - cp -r $(pwd)/ $GOPATH/src/github.com/janeczku/docker-machine-vultr
   override:
     - make get-deps
     - make build
