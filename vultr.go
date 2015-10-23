@@ -413,7 +413,7 @@ func (d *Driver) validatePlan() error {
 			return nil
 		}
 	}
-	return fmt.Errorf("Plan ID %d not available in this region. Available plans: %v", d.PlanID, plans)
+	return fmt.Errorf("PlanID %d not available in the chosen region. Available plans for RegionID %d: %v", d.PlanID, d.RegionID, plans)
 }
 
 // RancherOS - Create iPXE boot script
