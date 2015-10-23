@@ -18,8 +18,8 @@ This plugin adds support for [Vultr](https://www.vultr.com/) cloud instances to 
 
 Requirement: [Docker Machine](https://github.com/docker/machine)
 
-Download the `docker-machine-vultr` binary from the release page.
-Extract the archive and copy the binary to a folder located in your `PATH` and make sure it's executable (e.g. `chmod +x /usr/local/bin/docker-machine-vultr`).
+Download the `docker-machine-driver-vultr` binary from the release page.
+Extract the archive and copy the binary to a folder located in your `PATH` and make sure it's executable (e.g. `chmod +x /usr/local/bin/docker-machine-driver-vultr`).
 
 ## Usage instructions
 
