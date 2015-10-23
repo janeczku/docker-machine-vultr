@@ -39,20 +39,20 @@ Command line flags:
 
       
 #### Recommendation
-By default the driver will provision new VPS with an Ubuntu 14.04 x64 installation. Be aware that the deployment of Ubuntu instances on Vultr can take several minutes.
-If you need faster ETAs for your machines i recommend to use [RancherOS](http://rancher.com/rancher-os/) as operating system by choosing `OSID` `159`. This will install the latest stable version of RancherOS via iPXE and should not take more than 30 seconds:
+By default new machine will be provisioned with Ubuntu 14.04 x64. Vultr doesn't use prebuilt images but instead provisions the instances using the regular OS installation process. This can take several minutes.
+If you need low ETAs for your machines i recommend to use [RancherOS](http://rancher.com/rancher-os/) as operating system by choosing `OSID` `159`. This will install the latest stable version of RancherOS via iPXE and should not take more than 30 seconds. For example:
 
-    --vultr-os-id=159
+    docker-machine create --driver vultr --vultr-api-key=aa11bb22cc33 --vultr-os-id=159 test-vps
 
  Environment variables and default values:
 
-| CLI option                      | Environment variable         | Default                |
-|---------------------------------|------------------------------|------------------------|
-| **`--vultr-api-key`**           | `VULTR_API_KEY`              | -                      |
-| `--vultr-os-id`                 | `VULTR_OS`                   | 160 *Ubuntu 14.04 x64* |
-| `--vultr-region-id`             | `VULTR_REGION`               | 1 *New Jersey*         |
-| `--vultr-plan-id`               | `VULTR_PLAN`                 | 29 *768 MB RAM*        |
-| `--vultr-ipv6`                  | `VULTR_IPV6`                 | `false`                |
-| `--vultr-private-networking`    | `VULTR_PRIVATE_NETWORKING`   | `false`                |
-| `--vultr-backups`               | `VULTR_BACKUPS`              | `false`                |
+| CLI option                      | Environment variable         | Default                     |
+|---------------------------------|------------------------------|-----------------------------|
+| **`--vultr-api-key`**           | `VULTR_API_KEY`              | -                           |
+| `--vultr-os-id`                 | `VULTR_OS`                   | 160 - *Ubuntu 14.04 x64*    |
+| `--vultr-region-id`             | `VULTR_REGION`               | 1 - *New Jersey*            |
+| `--vultr-plan-id`               | `VULTR_PLAN`                 | 29 - *"768 MB RAM,15 GB SSD*|
+| `--vultr-ipv6`                  | `VULTR_IPV6`                 | `false`                     |
+| `--vultr-private-networking`    | `VULTR_PRIVATE_NETWORKING`   | `false`                     |
+| `--vultr-backups`               | `VULTR_BACKUPS`              | `false`                     |
      
