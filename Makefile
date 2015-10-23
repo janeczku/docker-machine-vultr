@@ -34,7 +34,7 @@ release: dist
 	tar -cvzf release/$(NAME)-$(VERSION)-linux-armhf.tar.gz -C dist/linux/armhf $(NAME)
 	tar -cvzf release/$(NAME)-$(VERSION)-darwin-amd64.tar.gz -C dist/darwin/amd64 $(NAME)
 	tar -cvzf release/$(NAME)-$(VERSION)-windows-amd64.tar.gz -C dist/windows/amd64 $(NAME).exe
-	ghr -u janeczku -r $(NAME) --replace $(VERSION) release/
+	ghr -u janeczku -r docker-machine-vultr --replace $(VERSION) release/
 
 get-deps:
 	go get github.com/tcnksm/ghr
