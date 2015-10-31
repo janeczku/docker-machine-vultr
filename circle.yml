@@ -6,7 +6,7 @@ machine:
 dependencies:
   pre:
     - go version
-    - test -d /home/ubuntu/.go_workspace/src/github.com/docker/ && rm -rf /home/ubuntu/.go_workspace/src/github.com/docker
+    - test -d /home/ubuntu/.go_workspace/src/github.com/docker/ && rm -rf /home/ubuntu/.go_workspace/src/github.com/docker || true
     - test -d /home/ubuntu/.go_workspace/src/github.com/janeczku/ || mkdir -p /home/ubuntu/.go_workspace/src/github.com/janeczku/
     - test -e /home/ubuntu/.go_workspace/src/github.com/janeczku/docker-machine-vultr || ln -s /home/ubuntu/docker-machine-vultr/ /home/ubuntu/.go_workspace/src/github.com/janeczku/
   override:
