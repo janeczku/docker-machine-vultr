@@ -325,7 +325,7 @@ func (d *Driver) Remove() error {
 	}
 	if d.ScriptID != 0 {
 		<-d.bucket.SpendToken(1)
-		if err := client.DeleteStartupScript(string(d.ScriptID)); err != nil {
+		if err := client.DeleteStartupScript(strconv.Itoa(d.ScriptID)); err != nil {
 			if strings.Contains(err.Error(), "Check SCRIPTID") {
 				log.Infof("Script doesn't exist, assuming it is already deleted")
 			} else {
