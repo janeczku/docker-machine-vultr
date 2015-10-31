@@ -41,7 +41,7 @@ get-deps:
 	go get github.com/tools/godep
 	go get github.com/ChimeraCoder/tokenbucket
 	go get github.com/JamesClonk/vultr
-	go get -u github.com/docker/machine
+	go get github.com/docker/machine
 	go get github.com/docker/docker/pkg/term
 	go get golang.org/x/crypto/ssh
 	go get golang.org/x/crypto/ssh/terminal
