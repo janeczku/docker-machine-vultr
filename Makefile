@@ -23,10 +23,10 @@ dist-clean:
 	rm -rf release
 
 dist: dist-clean
-	mkdir -p dist/linux/amd64 && GOOS=linux GOARCH=amd64 go build -ldflags "$(LDFLAGS)" -o dist/linux/amd64/$(NAME) ./bin 
-	mkdir -p dist/linux/armhf && GOOS=linux GOARCH=arm GOARM=6 go build -ldflags "$(LDFLAGS)" -o dist/linux/armhf/$(NAME) ./bin 
-	mkdir -p dist/darwin/amd64 && GOOS=darwin GOARCH=amd64 go build -ldflags "$(LDFLAGS)" -o dist/darwin/amd64/$(NAME) ./bin 
-	mkdir -p dist/windows/amd64 && CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -ldflags "$(LDFLAGS)" -o dist/windows/amd64/$(NAME).exe ./bin 
+	mkdir -p dist/linux/amd64 && GOOS=linux GOARCH=amd64 go build -a -ldflags "$(LDFLAGS)" -o dist/linux/amd64/$(NAME) ./bin 
+	mkdir -p dist/linux/armhf && GOOS=linux GOARCH=arm GOARM=6 go build -a -ldflags "$(LDFLAGS)" -o dist/linux/armhf/$(NAME) ./bin 
+	mkdir -p dist/darwin/amd64 && GOOS=darwin GOARCH=amd64 go build -a -ldflags "$(LDFLAGS)" -o dist/darwin/amd64/$(NAME) ./bin 
+	mkdir -p dist/windows/amd64 && CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -a -ldflags "$(LDFLAGS)" -o dist/windows/amd64/$(NAME).exe ./bin 
 
 release: dist
 	mkdir -p release
@@ -41,7 +41,7 @@ get-deps:
 	go get github.com/tools/godep
 	go get github.com/ChimeraCoder/tokenbucket
 	go get github.com/JamesClonk/vultr
-	go get github.com/docker/machine
+	go get -u github.com/docker/machine
 	go get github.com/docker/docker/pkg/term
 	go get golang.org/x/crypto/ssh
 	go get golang.org/x/crypto/ssh/terminal
