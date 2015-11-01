@@ -47,7 +47,7 @@ OS installation on Vultr can take several minutes. If you need low ETAs for your
 
     docker-machine create --driver vultr --vultr-api-key=aa11bb22cc33 --vultr-os-id=159 test-vps
 
- Alternatively you can use any PXE boot script that you created in your Vultr account panel by supplying it's ID via the `--vultr-pxe-script` flag.
+ Alternatively you can use any PXE boot script that you created in your Vultr account panel by supplying it's ID with the `--vultr-pxe-script` flag. The operating system booted by your script *must* support cloudinit via ec2 metadata.
 
  Environment variables and default values:
 
