@@ -37,9 +37,10 @@ type Driver struct {
 }
 
 const (
-	defaultOS     = 160
-	defaultRegion = 1
-	defaultPlan   = 29
+	defaultOS      = 160
+	defaultRegion  = 1
+	defaultPlan    = 29
+	defaultSSHuser = "root"
 )
 
 // GetCreateFlags registers the flags this driver adds to
@@ -50,6 +51,12 @@ func (d *Driver) GetCreateFlags() []mcnflag.Flag {
 			EnvVar: "VULTR_API_KEY",
 			Name:   "vultr-api-key",
 			Usage:  "Vultr API key",
+		},
+		mcnflag.StringFlag{
+			EnvVar: "VULTR_SSH_USER",
+			Name:   "vultr-ssh-user",
+			Usage:  "Vultr SSH username",
+			Value:  defaultSSHuser,
 		},
 		mcnflag.IntFlag{
 			EnvVar: "VULTR_OS",
@@ -68,6 +75,11 @@ func (d *Driver) GetCreateFlags() []mcnflag.Flag {
 			Name:   "vultr-plan-id",
 			Usage:  "Vultr plan ID. Default: 768 MB RAM",
 			Value:  defaultPlan,
+		},
+		mcnflag.IntFlag{
+			EnvVar: "VULTR_PXE_SCRIPT",
+			Name:   "vultr-pxe-script",
+			Usage:  "PXE boot script ID. Requires vultr-os-id=159",
 		},
 		mcnflag.BoolFlag{
 			EnvVar: "VULTR_IPV6",
@@ -115,13 +127,14 @@ func (d *Driver) SetConfigFromFlags(flags drivers.DriverOptions) error {
 	d.OSID = flags.Int("vultr-os-id")
 	d.RegionID = flags.Int("vultr-region-id")
 	d.PlanID = flags.Int("vultr-plan-id")
+	d.ScriptID = flags.Int("vultr-pxe-script")
 	d.IPv6 = flags.Bool("vultr-ipv6")
 	d.PrivateNetworking = flags.Bool("vultr-private-networking")
 	d.Backups = flags.Bool("vultr-backups")
 	d.SwarmMaster = flags.Bool("swarm-master")
 	d.SwarmHost = flags.String("swarm-host")
 	d.SwarmDiscovery = flags.String("swarm-discovery")
-	d.SSHUser = "root"
+	d.SSHUser = flags.String("vultr-ssh-user")
 	d.SSHPort = 22
 
 	if d.APIKey == "" {
@@ -133,6 +146,10 @@ func (d *Driver) SetConfigFromFlags(flags drivers.DriverOptions) error {
 func (d *Driver) PreCreateCheck() error {
 
 	log.Info("Validating Vultr VPS parameters...")
+
+	if d.ScriptID != 0 && d.OSID != 159 {
+		return fmt.Errorf("PXE boot script can only be used with custom OS (vultr-os-id=159)")
+	}
 
 	if err := d.validateRegion(); err != nil {
 		return err
@@ -151,6 +168,7 @@ func (d *Driver) PreCreateCheck() error {
 
 func (d *Driver) Create() error {
 	var userdata string
+	var isRancherOS bool
 	log.Debug("Generating SSH key...")
 
 	key, err := d.createSSHKey()
@@ -162,19 +180,24 @@ func (d *Driver) Create() error {
 
 	log.Info("Creating Vultr VPS...")
 
-	// RancherOS iPXE boot prep
+	// iPXE deployment
 	if d.OSID == 159 {
-		log.Info("Deploying RancherOS via iPXE")
-		d.SSHUser = "rancher"
-		if err := d.createBootScript(); err != nil {
-			return err
+		log.Info("Using iPXE boot script for deployment")
+		if d.ScriptID == 0 {
+			isRancherOS = true
+			log.Info("Provisioning RancherOS")
+			d.SSHUser = "rancher"
+			if err := d.createBootScript(); err != nil {
+				return err
+			}
+			log.Debugf("Created RancherOS iPXE boot script (ID %d)", d.ScriptID)
 		}
-		log.Debugf("Uploaded iPXE boot script ID %d", d.ScriptID)
-		userdata, err = d.getCloudConfig()
+
+		userdata, err = d.getCloudConfig(isRancherOS)
 		if err != nil {
 			return err
 		}
-		log.Debugf("Using the following cloud-config file:")
+		log.Debugf("Using the following cloud-config:")
 		log.Debugf("%s", userdata)
 	}
 
@@ -437,16 +460,17 @@ boot`
 
 // RancherOS - Generate cloud-config userdata string that will
 // provision the SSH Key to the VPS and configure private networking
-func (d *Driver) getCloudConfig() (string, error) {
+func (d *Driver) getCloudConfig(isRancherOS bool) (string, error) {
 	type userData struct {
 		HostName   string
 		SSHkey     string
 		PrivateNet bool
+		Ros        bool
 	}
 	const tpl = `#cloud-config
 hostname: {{.HostName}}
 ssh_authorized_keys:
-  - {{.SSHkey}}{{if .PrivateNet}}
+  - {{.SSHkey}}{{if and .PrivateNet .Ros}}
 write_files:
   - path: /opt/rancher/bin/start.sh
     permissions: 0700
@@ -469,7 +493,7 @@ rancher:
 	if err != nil {
 		return "", err
 	}
-	config := userData{HostName: d.MachineName, SSHkey: string(publicKey), PrivateNet: d.PrivateNetworking}
+	config := userData{HostName: d.MachineName, SSHkey: string(publicKey), PrivateNet: d.PrivateNetworking, Ros: isRancherOS}
 
 	tmpl, err := template.New("cloud-config").Parse(tpl)
 	if err != nil {
