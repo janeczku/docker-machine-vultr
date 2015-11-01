@@ -30,28 +30,35 @@ Grab your API key from the [Vultr control panel](https://my.vultr.com/settings/)
 Command line flags:
 
  - `--vultr-api-key`: **required** Your Vultr API key.
+ - `--vultr-ssh-user`: SSH username for the new VPS
  - `--vultr-os-id`: Operating system ID to use (OSID). See [available OS IDs](https://www.vultr.com/api/#os_os_list).
  - `--vultr-region-id`: Region the VPS will be created in (DCID). See [available Region IDs](https://www.vultr.com/api/#regions_region_list).
  - `--vultr-plan-id`: Plan to use for this VPS (VPSPLANID). See [available Plan IDs](https://www.vultr.com/api/#plans_plan_list).
+ - `--vultr-pxe-script`: PXE boot script ID. Requires custom OS (vultr-os-id=159)
  - `--vultr-ipv6`: Enable IPv6 support for the VPS. 
  - `--vultr-private-networking`: Enable private networking support for the VPS.
  - `--vultr-backups`: Enable automatic backups for the VPS.
 
       
-#### Recommendation
-By default new machine will be provisioned with Ubuntu 14.04 x64. Vultr doesn't use prebuilt images but instead provisions the instances using the regular OS installation process. This can take several minutes.
-If you need low ETAs for your machines i recommend to use [RancherOS](http://rancher.com/rancher-os/) as operating system by choosing `OSID` `159`. This will install the latest stable version of RancherOS via iPXE and should not take more than 30 seconds. For example:
+### PXE deployment
+OS installation on Vultr can take several minutes. If you need low ETAs for your machines i recommend to use iPXE boot method by choosing the `OSID 159`. By default this will boot the latest stable version of [RancherOS](http://rancher.com/rancher-os/) with persistent storage on the disk.
+
+**Example for creating a new machine running RancherOS:**
 
     docker-machine create --driver vultr --vultr-api-key=aa11bb22cc33 --vultr-os-id=159 test-vps
+
+ Alternatively you can use any PXE boot script that you created in your Vultr account panel by supplying it's ID via the `--vultr-pxe-script` flag.
 
  Environment variables and default values:
 
 | CLI option                      | Environment variable         | Default                     |
 |---------------------------------|------------------------------|-----------------------------|
 | **`--vultr-api-key`**           | `VULTR_API_KEY`              | -                           |
-| `--vultr-os-id`                 | `VULTR_OS`                   | 160 - *Ubuntu 14.04 x64*    |
-| `--vultr-region-id`             | `VULTR_REGION`               | 1 - *New Jersey*            |
-| `--vultr-plan-id`               | `VULTR_PLAN`                 | 29 - *"768 MB RAM,15 GB SSD*|
+| `--vultr-ssh-user`              | `VULTR_SSH_USER`             | `root`                      |
+| `--vultr-os-id`                 | `VULTR_OS`                   | 160 (*Ubuntu 14.04 x64*)    |
+| `--vultr-region-id`             | `VULTR_REGION`               | 1 (*New Jersey*)            |
+| `--vultr-plan-id`               | `VULTR_PLAN`                 | 29 (*768 MB RAM,15 GB SSD*)|
+| `--vultr-pxe-script`            | `VULTR_PXE_SCRIPT`           | -                           |
 | `--vultr-ipv6`                  | `VULTR_IPV6`                 | `false`                     |
 | `--vultr-private-networking`    | `VULTR_PRIVATE_NETWORKING`   | `false`                     |
 | `--vultr-backups`               | `VULTR_BACKUPS`              | `false`                     |
