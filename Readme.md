@@ -38,6 +38,7 @@ Command line flags:
  - `--vultr-ipv6`: Enable IPv6 support for the VPS. 
  - `--vultr-private-networking`: Enable private networking support for the VPS.
  - `--vultr-backups`: Enable automatic backups for the VPS.
+ - `--vultr-userdata`: Path to file with cloud-init user-data
 
       
 ### PXE deployment
@@ -47,7 +48,7 @@ OS installation on Vultr can take several minutes. If you need low ETAs for your
 
     docker-machine create --driver vultr --vultr-api-key=aa11bb22cc33 --vultr-os-id=159 test-vps
 
- Alternatively you can use any PXE boot script that you created in your Vultr account panel by supplying it's ID with the `--vultr-pxe-script` flag. The operating system booted by your script *must* support cloudinit via ec2 metadata.
+ Alternatively you can use any PXE boot script that you created in your Vultr account panel by supplying it's ID with the `--vultr-pxe-script` flag. The operating system booted by your script must have Cloud-init enabled and be configured to get user data from ec2 metadata datasource.
 
  Environment variables and default values:
 
@@ -62,4 +63,5 @@ OS installation on Vultr can take several minutes. If you need low ETAs for your
 | `--vultr-ipv6`                  | `VULTR_IPV6`                 | `false`                     |
 | `--vultr-private-networking`    | `VULTR_PRIVATE_NETWORKING`   | `false`                     |
 | `--vultr-backups`               | `VULTR_BACKUPS`              | `false`                     |
+| `--vultr-userdata`              | `VULTR_USERDATA`             | -                           |
      
