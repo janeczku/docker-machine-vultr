@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io/ioutil"
+	"os"
 	"strconv"
 	"strings"
 	"text/template"
@@ -34,6 +35,7 @@ type Driver struct {
 	PrivateNetworking bool
 	ScriptID          int
 	HasCustomScript   bool
+	UserDataFile      string
 	bucket            *tokenbucket.Bucket
 }
 
@@ -97,6 +99,11 @@ func (d *Driver) GetCreateFlags() []mcnflag.Flag {
 			Name:   "vultr-backups",
 			Usage:  "Enable automatic backups for VPS",
 		},
+		mcnflag.StringFlag{
+			EnvVar: "VULTR_USERDATA",
+			Name:   "vultr-userdata",
+			Usage:  "path to file with cloud-init user-data",
+		},
 	}
 }
 
@@ -132,6 +139,7 @@ func (d *Driver) SetConfigFromFlags(flags drivers.DriverOptions) error {
 	d.IPv6 = flags.Bool("vultr-ipv6")
 	d.PrivateNetworking = flags.Bool("vultr-private-networking")
 	d.Backups = flags.Bool("vultr-backups")
+	d.UserDataFile = flags.String("vultr-userdata")
 	d.SwarmMaster = flags.Bool("swarm-master")
 	d.SwarmHost = flags.String("swarm-host")
 	d.SwarmDiscovery = flags.String("swarm-discovery")
@@ -145,11 +153,19 @@ func (d *Driver) SetConfigFromFlags(flags drivers.DriverOptions) error {
 }
 
 func (d *Driver) PreCreateCheck() error {
+	if d.UserDataFile != "" {
+		if d.OSID == 159 {
+			return fmt.Errorf("passing user-data is not supported with custom OS (--vultr-os-id 159)")
+		}
+		if _, err := os.Stat(d.UserDataFile); os.IsNotExist(err) {
+			return fmt.Errorf("Unable to find user-data file at %s", d.UserDataFile)
+		}
+	}
 
 	log.Info("Validating Vultr VPS parameters...")
 
 	if d.ScriptID != 0 && d.OSID != 159 {
-		return fmt.Errorf("PXE boot script can only be used with custom OS (vultr-os-id=159)")
+		return fmt.Errorf("PXE boot script requires using custom OS (--vultr-os-id 159)")
 	}
 
 	if err := d.validateRegion(); err != nil {
@@ -168,19 +184,17 @@ func (d *Driver) PreCreateCheck() error {
 }
 
 func (d *Driver) Create() error {
-	var userdata string
 	log.Debug("Generating SSH key...")
 
 	key, err := d.createSSHKey()
 	if err != nil {
 		return err
 	}
-
 	d.SSHKeyID = key.ID
 
 	log.Info("Creating Vultr VPS...")
+	var userdata string
 
-	// iPXE deployment
 	if d.OSID == 159 {
 		log.Info("Using iPXE boot script for deployment")
 		if d.ScriptID != 0 {
@@ -198,7 +212,16 @@ func (d *Driver) Create() error {
 		if err != nil {
 			return err
 		}
-		log.Debugf("Using the following ec2 cloud-config:")
+	} else if d.UserDataFile != "" {
+		buf, err := ioutil.ReadFile(d.UserDataFile)
+		if err != nil {
+			return err
+		}
+		userdata = string(buf)
+	}
+
+	if userdata != "" {
+		log.Debugf("Using the following cloud-init user-data:")
 		log.Debugf("%s", userdata)
 	}
 
