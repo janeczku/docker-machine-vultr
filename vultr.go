@@ -33,6 +33,7 @@ type Driver struct {
 	Backups           bool
 	PrivateNetworking bool
 	ScriptID          int
+	HasCustomScript   bool
 	bucket            *tokenbucket.Bucket
 }
 
@@ -168,7 +169,6 @@ func (d *Driver) PreCreateCheck() error {
 
 func (d *Driver) Create() error {
 	var userdata string
-	var isRancherOS bool
 	log.Debug("Generating SSH key...")
 
 	key, err := d.createSSHKey()
@@ -183,8 +183,9 @@ func (d *Driver) Create() error {
 	// iPXE deployment
 	if d.OSID == 159 {
 		log.Info("Using iPXE boot script for deployment")
-		if d.ScriptID == 0 {
-			isRancherOS = true
+		if d.ScriptID != 0 {
+			d.HasCustomScript = true
+		} else {
 			log.Info("Provisioning RancherOS")
 			d.SSHUser = "rancher"
 			if err := d.createBootScript(); err != nil {
@@ -193,11 +194,11 @@ func (d *Driver) Create() error {
 			log.Debugf("Created RancherOS iPXE boot script (ID %d)", d.ScriptID)
 		}
 
-		userdata, err = d.getCloudConfig(isRancherOS)
+		userdata, err = d.getCloudConfig()
 		if err != nil {
 			return err
 		}
-		log.Debugf("Using the following cloud-config:")
+		log.Debugf("Using the following ec2 cloud-config:")
 		log.Debugf("%s", userdata)
 	}
 
@@ -346,11 +347,11 @@ func (d *Driver) Remove() error {
 			return err
 		}
 	}
-	if d.ScriptID != 0 {
+	if d.ScriptID != 0 && !d.HasCustomScript {
 		<-d.bucket.SpendToken(1)
 		if err := client.DeleteStartupScript(strconv.Itoa(d.ScriptID)); err != nil {
 			if strings.Contains(err.Error(), "Check SCRIPTID") {
-				log.Infof("Script doesn't exist, assuming it is already deleted")
+				log.Infof("PXE boot script doesn't exist, assuming it is already deleted")
 			} else {
 				return err
 			}
@@ -460,17 +461,17 @@ boot`
 
 // RancherOS - Generate cloud-config userdata string that will
 // provision the SSH Key to the VPS and configure private networking
-func (d *Driver) getCloudConfig(isRancherOS bool) (string, error) {
+func (d *Driver) getCloudConfig() (string, error) {
 	type userData struct {
-		HostName   string
-		SSHkey     string
-		PrivateNet bool
-		Ros        bool
+		HostName     string
+		SSHkey       string
+		PrivateNet   bool
+		CustomScript bool
 	}
 	const tpl = `#cloud-config
 hostname: {{.HostName}}
 ssh_authorized_keys:
-  - {{.SSHkey}}{{if and .PrivateNet .Ros}}
+  - {{.SSHkey}}{{if not .CustomScript}}{{if .PrivateNet}}
 write_files:
   - path: /opt/rancher/bin/start.sh
     permissions: 0700
@@ -485,7 +486,7 @@ rancher:
         dhcp: true
       eth1:
         address: $private_ipv4/16
-        mtu: 1450{{end}}
+        mtu: 1450{{end}}{{end}}
 `
 	var buffer bytes.Buffer
 
@@ -493,7 +494,7 @@ rancher:
 	if err != nil {
 		return "", err
 	}
-	config := userData{HostName: d.MachineName, SSHkey: string(publicKey), PrivateNet: d.PrivateNetworking, Ros: isRancherOS}
+	config := userData{HostName: d.MachineName, SSHkey: string(publicKey), PrivateNet: d.PrivateNetworking, CustomScript: d.HasCustomScript}
 
 	tmpl, err := template.New("cloud-config").Parse(tpl)
 	if err != nil {
