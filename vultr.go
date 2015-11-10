@@ -467,7 +467,7 @@ func (d *Driver) validatePlan() error {
 func (d *Driver) createBootScript() error {
 	content := `#!ipxe
 set base-url https://releases.rancher.com/os/latest
-kernel ${base-url}/vmlinuz rancher.state.autoformat=[/dev/vda] rancher.cloud_init.datasources=[ec2]
+kernel ${base-url}/vmlinuz rancher.state.formatzero=true rancher.state.autoformat=[/dev/sda,/dev/vda] rancher.cloud_init.datasources=[ec2]
 initrd ${base-url}/initrd
 boot`
 	<-d.bucket.SpendToken(1)
