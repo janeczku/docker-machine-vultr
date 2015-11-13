@@ -65,3 +65,8 @@ OS installation on Vultr can take several minutes. If you need low ETAs for your
 | `--vultr-backups`               | `VULTR_BACKUPS`              | `false`                     |
 | `--vultr-userdata`              | `VULTR_USERDATA`             | -                           |
      
+### Find available plans for all Vultr locations
+
+Check out [vultr-status.appspot.com](http://vultr-status.appspot.com) for a live listing of the available plans per region. Get the applicable `--vultr-region-id` and `--vultr-plan-id` parameters with the click of a button.
+
+[![vultr-status website](vultr-status-screenshot.png?raw=true)](http://vultr-status.appspot.com)
