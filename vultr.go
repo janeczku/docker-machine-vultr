@@ -10,7 +10,6 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/ChimeraCoder/tokenbucket"
 	vultr "github.com/JamesClonk/vultr/lib"
 	"github.com/docker/machine/libmachine/drivers"
 	"github.com/docker/machine/libmachine/log"
@@ -18,8 +17,6 @@ import (
 	"github.com/docker/machine/libmachine/ssh"
 	"github.com/docker/machine/libmachine/state"
 )
-
-var vultrTokenBucket = tokenbucket.NewBucket(500*time.Millisecond, 1)
 
 type Driver struct {
 	*drivers.BaseDriver
@@ -36,11 +33,11 @@ type Driver struct {
 	ScriptID          int
 	HasCustomScript   bool
 	UserDataFile      string
-	bucket            *tokenbucket.Bucket
 	client            *vultr.Client
 }
 
 const (
+	defaultOS      = 159
 	defaultRegion  = 1
 	defaultPlan    = 29
 	defaultSSHuser = "root"
@@ -77,6 +74,7 @@ func (d *Driver) GetCreateFlags() []mcnflag.Flag {
 			EnvVar: "VULTR_OS",
 			Name:   "vultr-os-id",
 			Usage:  "Vultr operating system ID",
+			Value:  defaultOS,
 		},
 		mcnflag.IntFlag{
 			EnvVar: "VULTR_PXE_SCRIPT",
@@ -108,15 +106,14 @@ func (d *Driver) GetCreateFlags() []mcnflag.Flag {
 
 func NewDriver(hostName, storePath string) *Driver {
 	d := &Driver{
+		OSID: defaultOS,
 		PlanID:   defaultPlan,
 		RegionID: defaultRegion,
-		bucket:   nil,
 		BaseDriver: &drivers.BaseDriver{
 			MachineName: hostName,
 			StorePath:   storePath,
 		},
 	}
-	d.bucket = vultrTokenBucket
 	return d
 }
 
@@ -167,10 +164,6 @@ func (d *Driver) PreCreateCheck() error {
 		return fmt.Errorf("Using PXE boot script requires 'Custom OS' (159)")
 	}
 
-	if d.ScriptID == 0 && d.OSID == 159 {
-		return fmt.Errorf("'Custom OS' (159) requires passing a script ID with 'vultr-pxe-script'")
-	}
-
 	if err := d.validateRegion(); err != nil {
 		return err
 	}
@@ -198,7 +191,7 @@ func (d *Driver) Create() error {
 	log.Info("Creating Vultr VPS...")
 	var userdata string
 
-	if d.OSID == 159 || d.OSID == 0 {
+	if d.OSID == 159 {
 		log.Info("Using PXE boot")
 		if d.ScriptID != 0 {
 			d.HasCustomScript = true
@@ -229,7 +222,6 @@ func (d *Driver) Create() error {
 	}
 
 	client := d.getClient()
-	<-d.bucket.SpendToken(1)
 	machine, err := client.CreateServer(
 		d.MachineName,
 		d.RegionID,
@@ -250,7 +242,6 @@ func (d *Driver) Create() error {
 
 	log.Info("Waiting for IP address to become available...")
 	for {
-		<-d.bucket.SpendToken(3)
 		machine, err = client.GetServer(d.MachineID)
 		if err != nil {
 			return err
@@ -262,6 +253,7 @@ func (d *Driver) Create() error {
 			break
 		}
 		log.Debug("IP address not yet available")
+		time.Sleep(2 * time.Second)
 	}
 
 	if d.PrivateIP == "0" {
@@ -287,7 +279,6 @@ func (d *Driver) createSSHKey() (*vultr.SSHKey, error) {
 		return nil, err
 	}
 
-	<-d.bucket.SpendToken(1)
 	key, err := d.getClient().CreateSSHKey(d.MachineName, string(publicKey))
 	if err != nil {
 		return &key, err
@@ -303,8 +294,14 @@ func (d *Driver) GetURL() (string, error) {
 	return fmt.Sprintf("tcp://%s:2376", ip), nil
 }
 
+func (d *Driver) GetIP() (string, error) {
+	if d.IPAddress == "" || d.IPAddress == "0" {
+		return "", fmt.Errorf("IP address is not set")
+	}
+	return d.IPAddress, nil
+}
+
 func (d *Driver) GetState() (state.State, error) {
-	<-d.bucket.SpendToken(1)
 	machine, err := d.getClient().GetServer(d.MachineID)
 	if err != nil {
 		return state.Error, err
@@ -331,7 +328,6 @@ func (d *Driver) Start() error {
 		return nil
 	}
 	log.Debugf("starting %s", d.MachineName)
-	<-d.bucket.SpendToken(1)
 	return d.getClient().StartServer(d.MachineID)
 }
 
@@ -343,14 +339,12 @@ func (d *Driver) Stop() error {
 		return nil
 	}
 	log.Debugf("stopping %s", d.MachineName)
-	<-d.bucket.SpendToken(1)
 	return d.getClient().HaltServer(d.MachineID)
 }
 
 func (d *Driver) Remove() error {
 	client := d.getClient()
 	log.Debugf("removing %s", d.MachineName)
-	<-d.bucket.SpendToken(1)
 	if err := client.DeleteServer(d.MachineID); err != nil {
 		if strings.Contains(err.Error(), "Invalid server") {
 			log.Infof("VPS doesn't exist, assuming it is already deleted")
@@ -358,7 +352,6 @@ func (d *Driver) Remove() error {
 			return err
 		}
 	}
-	<-d.bucket.SpendToken(1)
 	if err := client.DeleteSSHKey(d.SSHKeyID); err != nil {
 		if strings.Contains(err.Error(), "Invalid SSH Key") {
 			log.Infof("SSH key doesn't exist, assuming it is already deleted")
@@ -367,7 +360,6 @@ func (d *Driver) Remove() error {
 		}
 	}
 	if d.ScriptID != 0 && !d.HasCustomScript {
-		<-d.bucket.SpendToken(1)
 		if err := client.DeleteStartupScript(strconv.Itoa(d.ScriptID)); err != nil {
 			if strings.Contains(err.Error(), "Check SCRIPTID") {
 				log.Infof("PXE boot script doesn't exist, assuming it is already deleted")
@@ -387,7 +379,6 @@ func (d *Driver) Restart() error {
 		return nil
 	}
 	log.Debugf("restarting %s", d.MachineName)
-	<-d.bucket.SpendToken(1)
 	return d.getClient().RebootServer(d.MachineID)
 }
 
@@ -399,11 +390,11 @@ func (d *Driver) Kill() error {
 		return nil
 	}
 	log.Debugf("killing %s", d.MachineName)
-	<-d.bucket.SpendToken(1)
 	return d.getClient().HaltServer(d.MachineID)
 }
 
 func (d *Driver) getClient() *vultr.Client {
+	log.Infof("getting client")
 	if d.client == nil {
 		d.client = vultr.NewClient(d.APIKey, nil)
 	}
@@ -435,7 +426,6 @@ func (d *Driver) validateApiCredentials() error {
 }
 
 func (d *Driver) validateRegion() error {
-	<-d.bucket.SpendToken(1)
 	regions, err := d.getClient().GetRegions()
 	if err != nil {
 		return err
@@ -449,7 +439,6 @@ func (d *Driver) validateRegion() error {
 }
 
 func (d *Driver) validatePlan() error {
-	<-d.bucket.SpendToken(1)
 	plans, err := d.getClient().GetAvailablePlansForRegion(d.RegionID)
 	if err != nil {
 		return err
@@ -469,7 +458,6 @@ set base-url https://releases.rancher.com/os/latest
 kernel ${base-url}/vmlinuz rancher.state.formatzero=true rancher.state.autoformat=[/dev/sda,/dev/vda] rancher.cloud_init.datasources=[ec2]
 initrd ${base-url}/initrd
 boot`
-	<-d.bucket.SpendToken(1)
 	script, err := d.getClient().CreateStartupScript(d.MachineName, content, "pxe")
 	if err != nil {
 		return err
