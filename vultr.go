@@ -19,7 +19,7 @@ import (
 	"github.com/docker/machine/libmachine/state"
 )
 
-var vultrTokenBucket = tokenbucket.NewBucket(1*time.Second, 1)
+var vultrTokenBucket = tokenbucket.NewBucket(500*time.Millisecond, 1)
 
 type Driver struct {
 	*drivers.BaseDriver
@@ -37,10 +37,10 @@ type Driver struct {
 	HasCustomScript   bool
 	UserDataFile      string
 	bucket            *tokenbucket.Bucket
+	client            *vultr.Client
 }
 
 const (
-	defaultOS      = 160
 	defaultRegion  = 1
 	defaultPlan    = 29
 	defaultSSHuser = "root"
@@ -62,12 +62,6 @@ func (d *Driver) GetCreateFlags() []mcnflag.Flag {
 			Value:  defaultSSHuser,
 		},
 		mcnflag.IntFlag{
-			EnvVar: "VULTR_OS",
-			Name:   "vultr-os-id",
-			Usage:  "Vultr operating system ID. Default: ubuntu-14-04-x64",
-			Value:  defaultOS,
-		},
-		mcnflag.IntFlag{
 			EnvVar: "VULTR_REGION",
 			Name:   "vultr-region-id",
 			Usage:  "Vultr region ID. Default: New Jersey",
@@ -80,9 +74,14 @@ func (d *Driver) GetCreateFlags() []mcnflag.Flag {
 			Value:  defaultPlan,
 		},
 		mcnflag.IntFlag{
+			EnvVar: "VULTR_OS",
+			Name:   "vultr-os-id",
+			Usage:  "Vultr operating system ID",
+		},
+		mcnflag.IntFlag{
 			EnvVar: "VULTR_PXE_SCRIPT",
 			Name:   "vultr-pxe-script",
-			Usage:  "PXE boot script ID. Requires vultr-os-id=159",
+			Usage:  "PXE boot script ID",
 		},
 		mcnflag.BoolFlag{
 			EnvVar: "VULTR_IPV6",
@@ -102,14 +101,13 @@ func (d *Driver) GetCreateFlags() []mcnflag.Flag {
 		mcnflag.StringFlag{
 			EnvVar: "VULTR_USERDATA",
 			Name:   "vultr-userdata",
-			Usage:  "path to file with cloud-init user-data",
+			Usage:  "Path to file with Cloud-init User Data",
 		},
 	}
 }
 
 func NewDriver(hostName, storePath string) *Driver {
 	d := &Driver{
-		OSID:     defaultOS,
 		PlanID:   defaultPlan,
 		RegionID: defaultRegion,
 		bucket:   nil,
@@ -126,6 +124,7 @@ func (d *Driver) GetSSHHostname() (string, error) {
 	return d.GetIP()
 }
 
+// DriverName returns the name of the driver
 func (d *Driver) DriverName() string {
 	return "vultr"
 }
@@ -147,7 +146,7 @@ func (d *Driver) SetConfigFromFlags(flags drivers.DriverOptions) error {
 	d.SSHPort = 22
 
 	if d.APIKey == "" {
-		return fmt.Errorf("vultr driver requires the --vultr-api-key option")
+		return fmt.Errorf("Vultr driver requires the --vultr-api-key option")
 	}
 	return nil
 }
@@ -155,17 +154,21 @@ func (d *Driver) SetConfigFromFlags(flags drivers.DriverOptions) error {
 func (d *Driver) PreCreateCheck() error {
 	if d.UserDataFile != "" {
 		if d.OSID == 159 {
-			return fmt.Errorf("passing user-data is not supported with custom OS (--vultr-os-id 159)")
+			return fmt.Errorf("User Data is currently not supported with 'Custom OS' (159)")
 		}
 		if _, err := os.Stat(d.UserDataFile); os.IsNotExist(err) {
-			return fmt.Errorf("Unable to find user-data file at %s", d.UserDataFile)
+			return fmt.Errorf("Unable to find User Data file at %s", d.UserDataFile)
 		}
 	}
 
 	log.Info("Validating Vultr VPS parameters...")
 
 	if d.ScriptID != 0 && d.OSID != 159 {
-		return fmt.Errorf("PXE boot script requires using custom OS (--vultr-os-id 159)")
+		return fmt.Errorf("Using PXE boot script requires 'Custom OS' (159)")
+	}
+
+	if d.ScriptID == 0 && d.OSID == 159 {
+		return fmt.Errorf("'Custom OS' (159) requires passing a script ID with 'vultr-pxe-script'")
 	}
 
 	if err := d.validateRegion(); err != nil {
@@ -195,17 +198,17 @@ func (d *Driver) Create() error {
 	log.Info("Creating Vultr VPS...")
 	var userdata string
 
-	if d.OSID == 159 {
-		log.Info("Using iPXE boot script for deployment")
+	if d.OSID == 159 || d.OSID == 0 {
+		log.Info("Using PXE boot")
 		if d.ScriptID != 0 {
 			d.HasCustomScript = true
 		} else {
-			log.Info("Provisioning RancherOS")
+			log.Info("Provisioning RancherOS (stable)")
 			d.SSHUser = "rancher"
 			if err := d.createBootScript(); err != nil {
 				return err
 			}
-			log.Debugf("Created RancherOS iPXE boot script (ID %d)", d.ScriptID)
+			log.Debugf("Created RancherOS PXE boot script (ID %d)", d.ScriptID)
 		}
 
 		userdata, err = d.getCloudConfig()
@@ -221,7 +224,7 @@ func (d *Driver) Create() error {
 	}
 
 	if userdata != "" {
-		log.Debugf("Using the following cloud-init user-data:")
+		log.Debugf("Using the following Cloud-init User Data:")
 		log.Debugf("%s", userdata)
 	}
 
@@ -298,13 +301,6 @@ func (d *Driver) GetURL() (string, error) {
 		return "", err
 	}
 	return fmt.Sprintf("tcp://%s:2376", ip), nil
-}
-
-func (d *Driver) GetIP() (string, error) {
-	if d.IPAddress == "" || d.IPAddress == "0" {
-		return "", fmt.Errorf("IP address is not set")
-	}
-	return d.IPAddress, nil
 }
 
 func (d *Driver) GetState() (state.State, error) {
@@ -408,7 +404,10 @@ func (d *Driver) Kill() error {
 }
 
 func (d *Driver) getClient() *vultr.Client {
-	return vultr.NewClient(d.APIKey, nil)
+	if d.client == nil {
+		d.client = vultr.NewClient(d.APIKey, nil)
+	}
+	return d.client
 }
 
 func (d *Driver) publicSSHKeyPath() string {
