@@ -12,6 +12,7 @@ dependencies:
   override:
     - go get -u github.com/docker/machine
     - make get-deps
+    - git --git-dir=/home/ubuntu/.go_workspace/src/github.com/docker/machine/.git --work-tree=/home/ubuntu/.go_workspace/src/github.com/docker/machine checkout tags/v0.5.0
     - make build
   post:
     - cp build/* $CIRCLE_ARTIFACTS
