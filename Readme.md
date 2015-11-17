@@ -16,7 +16,7 @@ This plugin adds support for [Vultr](https://www.vultr.com/) cloud instances to 
 
 ## Installation
 
-Requirement: [Docker Machine 0.5.0-rc4](https://github.com/docker/machine)
+Requirement: [Docker Machine 0.5.0](https://github.com/docker/machine)
 
 Download the `docker-machine-driver-vultr` binary from the release page.
 Extract the archive and copy the binary to a folder located in your `PATH` and make sure it's executable (e.g. `chmod +x /usr/local/bin/docker-machine-driver-vultr`).
@@ -25,7 +25,13 @@ Extract the archive and copy the binary to a folder located in your `PATH` and m
 
 Grab your API key from the [Vultr control panel](https://my.vultr.com/settings/) and pass that to `docker-machine create` with the `--vultr-api-key` option.
 
-    $ docker-machine create --driver vultr --vultr-api-key=aa11bb22cc33 test-vps
+**Example for creating a new machine running RancherOS:**
+
+    docker-machine create --driver vultr --vultr-api-key=abc123 rancheros-machine
+
+**Example for creating a new machine running Ubuntu 14.04:**
+
+    docker-machine create --driver vultr --vultr-api-key=abc123 --vultr-os-id=160 ubuntu-machine
 
 Command line flags:
 
@@ -40,15 +46,11 @@ Command line flags:
  - `--vultr-backups`: Enable automatic backups for the VPS.
  - `--vultr-userdata`: Path to file with cloud-init user-data
 
-      
+When `--vultr-os-id` is not specified the current stable version of [RancherOS](http://rancher.com/rancher-os/) will be installed on the VPS.
+
 ### PXE deployment
-OS installation on Vultr can take several minutes. If you need low ETAs for your machines i recommend to use iPXE boot method by choosing the `OSID 159`. By default this will boot the latest stable version of [RancherOS](http://rancher.com/rancher-os/) with persistent storage on the disk.
-
-**Example for creating a new machine running RancherOS:**
-
-    docker-machine create --driver vultr --vultr-api-key=aa11bb22cc33 --vultr-os-id=159 test-vps
-
- Alternatively you can use any PXE boot script that you created in your Vultr account panel by supplying it's ID with the `--vultr-pxe-script` flag. The operating system booted by your script must have Cloud-init enabled and be configured to get user data from ec2 metadata datasource.
+You can boot a custom OS using a PXE boot script that you created in your Vultr account panel by supplying it's ID with the `--vultr-pxe-script` flag and setting `--vultr-os-id` to `159`.
+The operating system must support Cloud-init and be configured to use the `ec2` datasource type.
 
  Environment variables and default values:
 
@@ -56,9 +58,9 @@ OS installation on Vultr can take several minutes. If you need low ETAs for your
 |---------------------------------|------------------------------|-----------------------------|
 | **`--vultr-api-key`**           | `VULTR_API_KEY`              | -                           |
 | `--vultr-ssh-user`              | `VULTR_SSH_USER`             | `root`                      |
-| `--vultr-os-id`                 | `VULTR_OS`                   | 160 (*Ubuntu 14.04 x64*)    |
 | `--vultr-region-id`             | `VULTR_REGION`               | 1 (*New Jersey*)            |
-| `--vultr-plan-id`               | `VULTR_PLAN`                 | 29 (*768 MB RAM,15 GB SSD*)|
+| `--vultr-plan-id`               | `VULTR_PLAN`                 | 29 (*768 MB RAM,15 GB SSD*) |
+| `--vultr-os-id`                 | `VULTR_OS`                   | -                           |
 | `--vultr-pxe-script`            | `VULTR_PXE_SCRIPT`           | -                           |
 | `--vultr-ipv6`                  | `VULTR_IPV6`                 | `false`                     |
 | `--vultr-private-networking`    | `VULTR_PRIVATE_NETWORKING`   | `false`                     |
