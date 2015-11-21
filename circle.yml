@@ -1,7 +1,5 @@
 machine:
   environment:
-    #GOPATH: /home/ubuntu:$GOPATH
-    #SRCDIR: /home/ubuntu$GOPATH/src/github.com/janeczku/docker-machine-vultr
     IMPORT_PATH: "github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME"
 
 dependencies:
@@ -10,10 +8,8 @@ dependencies:
     - mkdir -p "$GOPATH/src/$IMPORT_PATH"
     - rsync -azC --delete ./ "$GOPATH/src/$IMPORT_PATH/"
     - test -d "$GOPATH/src/github.com/docker/" && rm -rf "$GOPATH/src/github.com/docker" || true
-    #- test -d /home/ubuntu/.go_workspace/src/github.com/janeczku/ || mkdir -p /home/ubuntu/.go_workspace/src/github.com/janeczku/
-    #- test -e /home/ubuntu/.go_workspace/src/github.com/janeczku/docker-machine-vultr || ln -s /home/ubuntu/docker-machine-vultr/ /home/ubuntu/.go_workspace/src/github.com/janeczku/
+    - test -d /home/ubuntu/.go_workspace/src/github.com/docker/ && rm -rf /home/ubuntu/.go_workspace/src/github.com/docker || true
   override:
-    #- go get -u github.com/docker/machine
     - make get-deps
     - ls /usr/local/go_workspace/src/github.com
     - ls /home/ubuntu/.go_workspace/src/github.com
