@@ -13,7 +13,7 @@ dependencies:
     - make get-deps
     - ls /usr/local/go_workspace/src/github.com
     - ls /home/ubuntu/.go_workspace/src/github.com
-    - git --git-dir=/home/ubuntu/.go_workspace/src/github.com/docker/machine/.git --work-tree=/home/ubuntu/.go_workspace/src/github.com/docker/machine checkout tags/v0.5.1
+    - git --git-dir=/home/ubuntu/.go_workspace/src/github.com/docker/machine/.git --work-tree=/home/ubuntu/.go_workspace/src/github.com/docker/machine checkout tags/v0.6.0
     - make build
   post:
     - cp build/* $CIRCLE_ARTIFACTS
