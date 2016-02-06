@@ -454,7 +454,7 @@ func (d *Driver) validatePlan() error {
 // RancherOS - Create iPXE boot script
 func (d *Driver) createBootScript() error {
 	content := `#!ipxe
-set base-url https://releases.rancher.com/os/latest
+set base-url http://releases.rancher.com/os/latest
 kernel ${base-url}/vmlinuz rancher.state.formatzero=true rancher.state.autoformat=[/dev/sda,/dev/vda] rancher.cloud_init.datasources=[ec2]
 initrd ${base-url}/initrd
 boot`
