@@ -484,10 +484,10 @@ ssh_authorized_keys:
   - {{.SSHkey}}{{if not .CustomScript}}{{if .PrivateNet}}
 write_files:
   - path: /opt/rancher/bin/start.sh
-    permissions: 0700
+    permissions: "0755"
     content: |
       #!/bin/bash
-      sudo netconf
+      sudo system-docker restart network
       rm -- "$0"
 rancher:
   network:
