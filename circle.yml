@@ -10,7 +10,7 @@ checkout:
     - git fetch --tags
 
 dependencies:
-  pre:
+  post:
     - go version
     - make get-deps
 

@@ -37,16 +37,16 @@ release: dist
 	ghr -u janeczku -r docker-machine-vultr --replace $(VERSION) release/
 
 get-deps:
-	go get github.com/tcnksm/ghr
-	go get github.com/tools/godep
-	go get github.com/ChimeraCoder/tokenbucket
-	go get github.com/JamesClonk/vultr
-	go get github.com/docker/machine
-	go get github.com/docker/docker/pkg/term
-	go get golang.org/x/crypto/ssh
-	go get golang.org/x/crypto/ssh/terminal
-	go get github.com/Azure/go-ansiterm
-	go get github.com/Sirupsen/logrus
+	go get -u github.com/tcnksm/ghr
+	go get -u github.com/tools/godep
+	go get -u github.com/ChimeraCoder/tokenbucket
+	go get -u github.com/JamesClonk/vultr
+	go get -u github.com/docker/machine
+	go get -u github.com/docker/docker/pkg/term
+	go get -u golang.org/x/crypto/ssh
+	go get -u golang.org/x/crypto/ssh/terminal
+	go get -u github.com/Azure/go-ansiterm
+	go get -u github.com/Sirupsen/logrus
 
 check-gofmt:
 	if [ -n "$(shell gofmt -l .)" ]; then \
