@@ -310,11 +310,16 @@ func (d *Driver) GetState() (state.State, error) {
 	case "pending":
 		return state.Starting, nil
 	case "active":
-		switch machine.PowerStatus {
-		case "running":
-			return state.Running, nil
-		case "stopped":
-			return state.Stopped, nil
+		switch machine.ServerState {
+		case "ok":
+			switch machine.PowerStatus {
+			case "running":
+				return state.Running, nil
+			case "stopped":
+				return state.Stopped, nil
+			}
+		default:
+			return state.Starting, nil
 		}
 	}
 	return state.None, nil
