@@ -287,6 +287,15 @@ func (d *Driver) createSSHKey() (*vultr.SSHKey, error) {
 }
 
 func (d *Driver) GetURL() (string, error) {
+	s, err := d.GetState()
+	if err != nil {
+		return "", err
+	}
+
+	if s != state.Running {
+		return "", drivers.ErrHostIsNotRunning
+	}
+	
 	ip, err := d.GetIP()
 	if err != nil {
 		return "", err
