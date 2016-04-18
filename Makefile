@@ -23,22 +23,22 @@ dist-clean:
 	rm -rf release
 
 dist: dist-clean
-	mkdir -p dist/linux/amd64 && GOOS=linux GOARCH=amd64 go build -a -ldflags "$(LDFLAGS)" -o dist/linux/amd64/$(NAME) ./bin 
-	mkdir -p dist/linux/armhf && GOOS=linux GOARCH=arm GOARM=6 go build -a -ldflags "$(LDFLAGS)" -o dist/linux/armhf/$(NAME) ./bin 
-	mkdir -p dist/darwin/amd64 && GOOS=darwin GOARCH=amd64 go build -a -ldflags "$(LDFLAGS)" -o dist/darwin/amd64/$(NAME) ./bin 
-	mkdir -p dist/windows/amd64 && CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -a -ldflags "$(LDFLAGS)" -o dist/windows/amd64/$(NAME).exe ./bin 
+	mkdir -p release
+	mkdir -p dist
+	mkdir -p dist/linux/amd64 && GOOS=linux GOARCH=amd64 go build -a -ldflags "$(LDFLAGS)" -o dist/linux/amd64/$(NAME) ./bin
+	mkdir -p dist/linux/armhf && GOOS=linux GOARCH=arm GOARM=6 go build -a -ldflags "$(LDFLAGS)" -o dist/linux/armhf/$(NAME) ./bin
+	mkdir -p dist/darwin/amd64 && GOOS=darwin GOARCH=amd64 go build -a -ldflags "$(LDFLAGS)" -o dist/darwin/amd64/$(NAME) ./bin
+	mkdir -p dist/windows/amd64 && CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -a -ldflags "$(LDFLAGS)" -o dist/windows/amd64/$(NAME).exe ./bin
+	tar -cvzf release/$(NAME)-$(VERSION)-linux-amd64.tar.gz -C dist/linux/amd64 $(NAME)
+	md5sum release/$(NAME)-$(VERSION)-linux-amd64.tar.gz > release/$(NAME)-$(VERSION)-linux-amd64.md5
+	tar -cvzf release/$(NAME)-$(VERSION)-linux-armhf.tar.gz -C dist/linux/armhf $(NAME)
+	md5sum release/$(NAME)-$(VERSION)-linux-armhf.tar.gz > release/$(NAME)-$(VERSION)-linux-armhf.md5
+	tar -cvzf release/$(NAME)-$(VERSION)-darwin-amd64.tar.gz -C dist/darwin/amd64 $(NAME)
+	md5sum release/$(NAME)-$(VERSION)-darwin-amd64.tar.gz > release/$(NAME)-$(VERSION)-darwin-amd64.md5
+	tar -cvzf release/$(NAME)-$(VERSION)-windows-amd64.tar.gz -C dist/windows/amd64 $(NAME).exe
+	md5sum release/$(NAME)-$(VERSION)-windows-amd64.tar.gz > release/$(NAME)-$(VERSION)-windows-amd64.md5
 
 release: dist
-	mkdir -p release
-	tar -cvzf release/$(NAME)-$(VERSION)-linux-amd64.tar.gz -C dist/linux/amd64 $(NAME)
-	tar -cvzf release/$(NAME)-$(VERSION)-linux-armhf.tar.gz -C dist/linux/armhf $(NAME)
-	tar -cvzf release/$(NAME)-$(VERSION)-darwin-amd64.tar.gz -C dist/darwin/amd64 $(NAME)
-	tar -cvzf release/$(NAME)-$(VERSION)-windows-amd64.tar.gz -C dist/windows/amd64 $(NAME).exe
-	$(eval FILES := $(shell ls release))
-	@for f in $(FILES); do \
-		(cd $(shell pwd)/release && shasum -a 256 $$f > $$f.sha256); \
-		(cd $(shell pwd)/release && md5sum $$f > $$f.md5); \
-	done
 	ghr -u janeczku -r docker-machine-vultr --replace $(VERSION) release/
 
 get-deps:
