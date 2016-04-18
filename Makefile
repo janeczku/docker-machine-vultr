@@ -34,6 +34,11 @@ release: dist
 	tar -cvzf release/$(NAME)-$(VERSION)-linux-armhf.tar.gz -C dist/linux/armhf $(NAME)
 	tar -cvzf release/$(NAME)-$(VERSION)-darwin-amd64.tar.gz -C dist/darwin/amd64 $(NAME)
 	tar -cvzf release/$(NAME)-$(VERSION)-windows-amd64.tar.gz -C dist/windows/amd64 $(NAME).exe
+	$(eval FILES := $(shell ls release))
+	@for f in $(FILES); do \
+		(cd $(shell pwd)/release && shasum -a 256 $$f > $$f.sha256); \
+		(cd $(shell pwd)/release && md5sum $$f > $$f.md5); \
+	done
 	ghr -u janeczku -r docker-machine-vultr --replace $(VERSION) release/
 
 get-deps:
