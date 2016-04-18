@@ -495,14 +495,19 @@ func (d *Driver) getCloudConfig() (string, error) {
 	const tpl = `#cloud-config
 hostname: {{.HostName}}
 ssh_authorized_keys:
-  - {{.SSHkey}}{{if not .CustomScript}}{{if .PrivateNet}}
+  - {{.SSHkey}}
 write_files:
   - path: /opt/rancher/bin/start.sh
     permissions: "0755"
     content: |
-      #!/bin/bash
-      sudo system-docker restart network
-      rm -- "$0"
+      #!/bin/sh
+      mount | grep /dev/vda >/dev/null
+      RETVAL=$?
+      if [ $RETVAL -eq 0 ]; then
+        exit 0
+      fi
+      sudo dd if=/dev/zero of=/dev/vda bs=1M count=1
+      sudo reboot{{if not .CustomScript}}{{if .PrivateNet}}
 rancher:
   network:
     interfaces:
