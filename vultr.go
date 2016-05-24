@@ -106,7 +106,7 @@ func (d *Driver) GetCreateFlags() []mcnflag.Flag {
 
 func NewDriver(hostName, storePath string) *Driver {
 	d := &Driver{
-		OSID: defaultOS,
+		OSID:     defaultOS,
 		PlanID:   defaultPlan,
 		RegionID: defaultRegion,
 		BaseDriver: &drivers.BaseDriver{
@@ -295,7 +295,7 @@ func (d *Driver) GetURL() (string, error) {
 	if s != state.Running {
 		return "", drivers.ErrHostIsNotRunning
 	}
-	
+
 	ip, err := d.GetIP()
 	if err != nil {
 		return "", err

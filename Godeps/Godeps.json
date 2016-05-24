@@ -1,0 +1,131 @@
+{
+	"ImportPath": "github.com/janeczku/docker-machine-vultr",
+	"GoVersion": "go1.5",
+	"GodepVersion": "v70",
+	"Packages": [
+		"./..."
+	],
+	"Deps": [
+		{
+			"ImportPath": "github.com/Azure/go-ansiterm",
+			"Rev": "388960b655244e76e24c75f48631564eaefade62"
+		},
+		{
+			"ImportPath": "github.com/Azure/go-ansiterm/winterm",
+			"Rev": "388960b655244e76e24c75f48631564eaefade62"
+		},
+		{
+			"ImportPath": "github.com/JamesClonk/vultr/lib",
+			"Comment": "v1.8",
+			"Rev": "f4daffde4646155fa142e64e114f771aa259c7f5"
+		},
+		{
+			"ImportPath": "github.com/Sirupsen/logrus",
+			"Comment": "v0.10.0-18-g6d9ae30",
+			"Rev": "6d9ae300aaf85d6acd2e5424081c7fcddb21dab8"
+		},
+		{
+			"ImportPath": "github.com/docker/docker/pkg/system",
+			"Comment": "v1.4.1-12215-g1dc87a6",
+			"Rev": "1dc87a6f9fb1a28613f4937267055fad37893d03"
+		},
+		{
+			"ImportPath": "github.com/docker/docker/pkg/term",
+			"Comment": "v1.4.1-12215-g1dc87a6",
+			"Rev": "1dc87a6f9fb1a28613f4937267055fad37893d03"
+		},
+		{
+			"ImportPath": "github.com/docker/docker/pkg/term/windows",
+			"Comment": "v1.4.1-12215-g1dc87a6",
+			"Rev": "1dc87a6f9fb1a28613f4937267055fad37893d03"
+		},
+		{
+			"ImportPath": "github.com/docker/go-units",
+			"Comment": "v0.3.0",
+			"Rev": "5d2041e26a699eaca682e2ea41c8f891e1060444"
+		},
+		{
+			"ImportPath": "github.com/docker/machine/libmachine/drivers",
+			"Comment": "v0.7.0",
+			"Rev": "a650a404fc3e006fea17b12615266168db79c776"
+		},
+		{
+			"ImportPath": "github.com/docker/machine/libmachine/drivers/plugin",
+			"Comment": "v0.7.0",
+			"Rev": "a650a404fc3e006fea17b12615266168db79c776"
+		},
+		{
+			"ImportPath": "github.com/docker/machine/libmachine/drivers/plugin/localbinary",
+			"Comment": "v0.7.0",
+			"Rev": "a650a404fc3e006fea17b12615266168db79c776"
+		},
+		{
+			"ImportPath": "github.com/docker/machine/libmachine/drivers/rpc",
+			"Comment": "v0.7.0",
+			"Rev": "a650a404fc3e006fea17b12615266168db79c776"
+		},
+		{
+			"ImportPath": "github.com/docker/machine/libmachine/log",
+			"Comment": "v0.7.0",
+			"Rev": "a650a404fc3e006fea17b12615266168db79c776"
+		},
+		{
+			"ImportPath": "github.com/docker/machine/libmachine/mcnflag",
+			"Comment": "v0.7.0",
+			"Rev": "a650a404fc3e006fea17b12615266168db79c776"
+		},
+		{
+			"ImportPath": "github.com/docker/machine/libmachine/mcnutils",
+			"Comment": "v0.7.0",
+			"Rev": "a650a404fc3e006fea17b12615266168db79c776"
+		},
+		{
+			"ImportPath": "github.com/docker/machine/libmachine/ssh",
+			"Comment": "v0.7.0",
+			"Rev": "a650a404fc3e006fea17b12615266168db79c776"
+		},
+		{
+			"ImportPath": "github.com/docker/machine/libmachine/state",
+			"Comment": "v0.7.0",
+			"Rev": "a650a404fc3e006fea17b12615266168db79c776"
+		},
+		{
+			"ImportPath": "github.com/docker/machine/libmachine/version",
+			"Comment": "v0.7.0",
+			"Rev": "a650a404fc3e006fea17b12615266168db79c776"
+		},
+		{
+			"ImportPath": "github.com/docker/machine/version",
+			"Comment": "v0.7.0",
+			"Rev": "a650a404fc3e006fea17b12615266168db79c776"
+		},
+		{
+			"ImportPath": "github.com/juju/ratelimit",
+			"Rev": "77ed1c8a01217656d2080ad51981f6e99adaa177"
+		},
+		{
+			"ImportPath": "golang.org/x/crypto/curve25519",
+			"Rev": "5bcd134fee4dd1475da17714aac19c0aa0142e2f"
+		},
+		{
+			"ImportPath": "golang.org/x/crypto/ed25519",
+			"Rev": "5bcd134fee4dd1475da17714aac19c0aa0142e2f"
+		},
+		{
+			"ImportPath": "golang.org/x/crypto/ed25519/internal/edwards25519",
+			"Rev": "5bcd134fee4dd1475da17714aac19c0aa0142e2f"
+		},
+		{
+			"ImportPath": "golang.org/x/crypto/ssh",
+			"Rev": "5bcd134fee4dd1475da17714aac19c0aa0142e2f"
+		},
+		{
+			"ImportPath": "golang.org/x/crypto/ssh/terminal",
+			"Rev": "5bcd134fee4dd1475da17714aac19c0aa0142e2f"
+		},
+		{
+			"ImportPath": "golang.org/x/sys/unix",
+			"Rev": "eb2c74142fd19a79b3f237334c7384d5167b1b46"
+		}
+	]
+}

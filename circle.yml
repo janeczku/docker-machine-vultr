@@ -2,23 +2,33 @@ machine:
   environment:
     IMPORT_PATH: "github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME"
 
-checkout:
+general:
+  build_dir: ../.go_workspace/src/github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}
+
+dependencies:
+  pre:
+    - go version
+    - rm -rf ~/.go_workspace/src/github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME
+    - mkdir -p ~/.go_workspace/src/github.com/$CIRCLE_PROJECT_USERNAME/
+    - ln -s ~/$CIRCLE_PROJECT_REPONAME ~/.go_workspace/src/github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME
+    - make deps
+  override:
+    - echo "deps are vendored don't run go build"
   post:
     - git config user.name "Circle CI Build Bot"
     - git config user.email "no-reply@circleci.com"
     - git remote -v
     - git fetch --tags
-
-dependencies:
-  post:
-    - go version
-    - make get-deps
+    - git describe --abbrev=0 --tags
 
 test:
+  pre: 
+    - make vet
   override:
-    - git describe --abbrev=0 --tags
+    - make test
     - make build
-    - cp build/* $CIRCLE_ARTIFACTS
+    - mkdir $CIRCLE_ARTIFACTS/test_build
+    - mv build/* $CIRCLE_ARTIFACTS/test_build
 
 deployment:
   release:
