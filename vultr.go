@@ -37,10 +37,11 @@ type Driver struct {
 }
 
 const (
-	defaultOS      = 159
-	defaultRegion  = 1
-	defaultPlan    = 29
-	defaultSSHuser = "root"
+	defaultOS        = 159
+	defaultRegion    = 1
+	defaultPlan      = 29
+	defaultSSHuser   = "root"
+	clientMaxRetries = 5
 )
 
 // GetCreateFlags registers the flags this driver adds to
@@ -410,7 +411,7 @@ func (d *Driver) Kill() error {
 func (d *Driver) getClient() *vultr.Client {
 	log.Infof("getting client")
 	if d.client == nil {
-		d.client = vultr.NewClient(d.APIKey, nil)
+		d.client = vultr.NewClient(d.APIKey, &vultr.Options{MaxRetries: clientMaxRetries})
 	}
 	return d.client
 }
