@@ -409,7 +409,6 @@ func (d *Driver) Kill() error {
 }
 
 func (d *Driver) getClient() *vultr.Client {
-	log.Infof("getting client")
 	if d.client == nil {
 		d.client = vultr.NewClient(d.APIKey, &vultr.Options{MaxRetries: clientMaxRetries})
 	}
