@@ -10,9 +10,16 @@ parent="smn_machine_drivers"
 
 # Docker Machine driver plugin for Vultr
 
-This plugin adds support for [Vultr](https://www.vultr.com/) cloud instances to the `docker-machine` command line tool.
+[![Latest Version](https://img.shields.io/github/release/janeczku/docker-machine-vultr.svg?maxAge=2592000)][release]
+[![Github All Releases](https://img.shields.io/github/downloads/janeczku/docker-machine-vultr/total.svg?maxAge=2592000)]()
+[![CircleCI](https://img.shields.io/circleci/project/janeczku/docker-machine-vultr/master.svg?maxAge=2592000)][circleci]
+[![License](https://img.shields.io/github/license/janeczku/docker-machine-vultr.svg?maxAge=2592000)]()
 
-[![CircleCI branch](https://img.shields.io/circleci/project/janeczku/docker-machine-vultr/master.svg)](https://circleci.com/gh/janeczku/docker-machine-vultr/)
+[release]: https://github.com/janeczku/docker-machine-vultr/releases
+[circleci]: https://circleci.com/gh/janeczku/docker-machine-vultr/
+
+
+This plugin adds support for [Vultr](https://www.vultr.com/) cloud instances to the `docker-machine` command line tool.
 
 ## Installation
 
