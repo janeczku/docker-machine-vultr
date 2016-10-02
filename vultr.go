@@ -27,6 +27,8 @@ type Driver struct {
 	RegionID          int
 	PlanID            int
 	SSHKeyID          string
+	VultrPublicKey    string
+	ROSVersion        string
 	IPv6              bool
 	Backups           bool
 	PrivateNetworking bool
@@ -37,11 +39,12 @@ type Driver struct {
 }
 
 const (
-	defaultOS        = 159
-	defaultRegion    = 1
-	defaultPlan      = 29
-	defaultSSHuser   = "root"
-	clientMaxRetries = 5
+	defaultOS         = 159
+	defaultRegion     = 1
+	defaultPlan       = 29
+	defaultSSHuser    = "root"
+	defaultROSVersion = "v0.5.0"
+	clientMaxRetries  = 5
 )
 
 // GetCreateFlags registers the flags this driver adds to
@@ -77,10 +80,21 @@ func (d *Driver) GetCreateFlags() []mcnflag.Flag {
 			Usage:  "Vultr operating system ID",
 			Value:  defaultOS,
 		},
+		mcnflag.StringFlag{
+			EnvVar: "VULTR_ROS_VERSION",
+			Name:   "vultr-ros-version",
+			Usage:  "RancherOS version to use for the VM (eg. v0.6.0, latest)",
+			Value:  defaultROSVersion,
+		},
 		mcnflag.IntFlag{
 			EnvVar: "VULTR_PXE_SCRIPT",
 			Name:   "vultr-pxe-script",
 			Usage:  "PXE boot script ID",
+		},
+		mcnflag.StringFlag{
+			EnvVar: "VULTR_SSH_KEY",
+			Name:   "vultr-ssh-key-id",
+			Usage:  "ID of an existing SSH key in your Vultr account",
 		},
 		mcnflag.BoolFlag{
 			EnvVar: "VULTR_IPV6",
@@ -130,9 +144,11 @@ func (d *Driver) DriverName() string {
 func (d *Driver) SetConfigFromFlags(flags drivers.DriverOptions) error {
 	d.APIKey = flags.String("vultr-api-key")
 	d.OSID = flags.Int("vultr-os-id")
+	d.ROSVersion = flags.String("vultr-ros-version")
 	d.RegionID = flags.Int("vultr-region-id")
 	d.PlanID = flags.Int("vultr-plan-id")
 	d.ScriptID = flags.Int("vultr-pxe-script")
+	d.SSHKeyID = flags.String("vultr-ssh-key-id")
 	d.IPv6 = flags.Bool("vultr-ipv6")
 	d.PrivateNetworking = flags.Bool("vultr-private-networking")
 	d.Backups = flags.Bool("vultr-backups")
@@ -165,6 +181,16 @@ func (d *Driver) PreCreateCheck() error {
 		return fmt.Errorf("Using PXE boot script requires 'Custom OS' (159)")
 	}
 
+	if d.SSHKeyID != "" {
+		key, err := d.getPublicKeyByID(d.SSHKeyID)
+		if err != nil {
+			return err
+		}
+
+		log.Info("Using existing SSH public key: %s", key.Name)
+		d.VultrPublicKey = key.Key
+	}
+
 	if err := d.validateRegion(); err != nil {
 		return err
 	}
@@ -181,23 +207,24 @@ func (d *Driver) PreCreateCheck() error {
 }
 
 func (d *Driver) Create() error {
-	log.Debug("Generating SSH key...")
-
-	key, err := d.createSSHKey()
-	if err != nil {
-		return err
+	if d.SSHKeyID == "" {
+		log.Debug("Generating SSH key...")
+		key, err := d.createSSHKey()
+		if err != nil {
+			return err
+		}
+		d.SSHKeyID = key.ID
 	}
-	d.SSHKeyID = key.ID
 
 	log.Info("Creating Vultr VPS...")
 	var userdata string
-
+	var err error
 	if d.OSID == 159 {
 		log.Info("Using PXE boot")
 		if d.ScriptID != 0 {
 			d.HasCustomScript = true
 		} else {
-			log.Info("Provisioning RancherOS (stable)")
+			log.Infof("Using RancherOS (%s)", d.ROSVersion)
 			d.SSHUser = "rancher"
 			if err := d.createBootScript(); err != nil {
 				return err
@@ -229,18 +256,20 @@ func (d *Driver) Create() error {
 		d.PlanID,
 		d.OSID,
 		&vultr.ServerOptions{
-			SSHKey:            d.SSHKeyID,
-			IPV6:              d.IPv6,
-			PrivateNetworking: d.PrivateNetworking,
-			AutoBackups:       d.Backups,
-			Script:            d.ScriptID,
-			UserData:          userdata,
+			SSHKey:               d.SSHKeyID,
+			IPV6:                 d.IPv6,
+			PrivateNetworking:    d.PrivateNetworking,
+			AutoBackups:          d.Backups,
+			Script:               d.ScriptID,
+			UserData:             userdata,
+			Hostname:             d.MachineName,
+			DontNotifyOnActivate: true,
 		})
 	if err != nil {
 		return err
 	}
-	d.MachineID = machine.ID
 
+	d.MachineID = machine.ID
 	log.Info("Waiting for IP address to become available...")
 	for {
 		machine, err = client.GetServer(d.MachineID)
@@ -270,6 +299,21 @@ func (d *Driver) Create() error {
 	return nil
 }
 
+func (d *Driver) getPublicKeyByID(id string) (*vultr.SSHKey, error) {
+	keys, err := d.getClient().GetSSHKeys()
+	if err != nil {
+		return nil, err
+	}
+
+	for _, key := range keys {
+		if key.ID == id {
+			return &key, nil
+		}
+	}
+
+	return nil, fmt.Errorf("Vultr SSH key with ID %s doesn't exist", id)
+}
+
 func (d *Driver) createSSHKey() (*vultr.SSHKey, error) {
 	if err := ssh.GenerateSSHKey(d.GetSSHKeyPath()); err != nil {
 		return nil, err
@@ -284,6 +328,7 @@ func (d *Driver) createSSHKey() (*vultr.SSHKey, error) {
 	if err != nil {
 		return &key, err
 	}
+
 	return &key, nil
 }
 
@@ -301,6 +346,7 @@ func (d *Driver) GetURL() (string, error) {
 	if err != nil {
 		return "", err
 	}
+
 	return fmt.Sprintf("tcp://%s:2376", ip), nil
 }
 
@@ -308,6 +354,7 @@ func (d *Driver) GetIP() (string, error) {
 	if d.IPAddress == "" || d.IPAddress == "0" {
 		return "", fmt.Errorf("IP address is not set")
 	}
+
 	return d.IPAddress, nil
 }
 
@@ -316,6 +363,7 @@ func (d *Driver) GetState() (state.State, error) {
 	if err != nil {
 		return state.Error, err
 	}
+
 	switch machine.Status {
 	case "pending":
 		return state.Starting, nil
@@ -342,6 +390,7 @@ func (d *Driver) Start() error {
 		log.Infof("Host is already running or starting")
 		return nil
 	}
+
 	log.Debugf("starting %s", d.MachineName)
 	return d.getClient().StartServer(d.MachineID)
 }
@@ -353,6 +402,7 @@ func (d *Driver) Stop() error {
 		log.Infof("Host is already stopped")
 		return nil
 	}
+
 	log.Debugf("stopping %s", d.MachineName)
 	return d.getClient().HaltServer(d.MachineID)
 }
@@ -367,13 +417,7 @@ func (d *Driver) Remove() error {
 			return err
 		}
 	}
-	if err := client.DeleteSSHKey(d.SSHKeyID); err != nil {
-		if strings.Contains(err.Error(), "Invalid SSH Key") {
-			log.Infof("SSH key doesn't exist, assuming it is already deleted")
-		} else {
-			return err
-		}
-	}
+
 	if d.ScriptID != 0 && !d.HasCustomScript {
 		if err := client.DeleteStartupScript(strconv.Itoa(d.ScriptID)); err != nil {
 			if strings.Contains(err.Error(), "Check SCRIPTID") {
@@ -383,6 +427,17 @@ func (d *Driver) Remove() error {
 			}
 		}
 	}
+
+	if d.VultrPublicKey == "" {
+		if err := client.DeleteSSHKey(d.SSHKeyID); err != nil {
+			if strings.Contains(err.Error(), "Invalid SSH Key") {
+				log.Infof("SSH key doesn't exist, assuming it is already deleted")
+			} else {
+				return err
+			}
+		}
+	}
+
 	return nil
 }
 
@@ -393,6 +448,7 @@ func (d *Driver) Restart() error {
 		log.Infof("Host is already stopped, use start command to run it")
 		return nil
 	}
+
 	log.Debugf("restarting %s", d.MachineName)
 	return d.getClient().RebootServer(d.MachineID)
 }
@@ -404,6 +460,7 @@ func (d *Driver) Kill() error {
 		log.Infof("Host is already stopped")
 		return nil
 	}
+
 	log.Debugf("killing %s", d.MachineName)
 	return d.getClient().HaltServer(d.MachineID)
 }
@@ -412,6 +469,7 @@ func (d *Driver) getClient() *vultr.Client {
 	if d.client == nil {
 		d.client = vultr.NewClient(d.APIKey, &vultr.Options{MaxRetries: clientMaxRetries})
 	}
+
 	return d.client
 }
 
@@ -419,14 +477,25 @@ func (d *Driver) publicSSHKeyPath() string {
 	return d.GetSSHKeyPath() + ".pub"
 }
 
+func (d *Driver) GetSSHKeyPath() string {
+	// don't set SSHKeyPath when using an existing SSH key
+	if d.SSHKeyPath == "" && d.VultrPublicKey == "" {
+		d.SSHKeyPath = d.ResolveStorePath("id_rsa")
+	}
+
+	return d.SSHKeyPath
+}
+
 func (d *Driver) instanceIsRunning() bool {
 	st, err := d.GetState()
 	if err != nil {
 		log.Debug(err)
 	}
+
 	if st == state.Running {
 		return true
 	}
+
 	log.Debug("VPS not yet started")
 	return false
 }
@@ -436,6 +505,7 @@ func (d *Driver) validateApiCredentials() error {
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
 
@@ -444,11 +514,13 @@ func (d *Driver) validateRegion() error {
 	if err != nil {
 		return err
 	}
+
 	for _, region := range regions {
 		if region.ID == d.RegionID {
 			return nil
 		}
 	}
+
 	return fmt.Errorf("Region ID %d is invalid", d.RegionID)
 }
 
@@ -457,21 +529,27 @@ func (d *Driver) validatePlan() error {
 	if err != nil {
 		return err
 	}
+
 	for _, v := range plans {
 		if v == d.PlanID {
 			return nil
 		}
 	}
+
 	return fmt.Errorf("PlanID %d not available in the chosen region. Available plans for RegionID %d: %v", d.PlanID, d.RegionID, plans)
 }
 
 // RancherOS - Create iPXE boot script
 func (d *Driver) createBootScript() error {
 	content := `#!ipxe
-set base-url http://releases.rancher.com/os/latest
-kernel ${base-url}/vmlinuz rancher.state.formatzero=true rancher.state.autoformat=[/dev/sda,/dev/vda] rancher.cloud_init.datasources=[ec2]
+set base-url http://releases.rancher.com/os/%s
+kernel ${base-url}/vmlinuz rancher.state.dev=LABEL=RANCHER_STATE rancher.state.autoformat=[/dev/vda] rancher.state.formatzero rancher.cloud_init.datasources=[ec2]
 initrd ${base-url}/initrd
 boot`
+
+	content = fmt.Sprintf(content, d.ROSVersion)
+	log.Debugf("Using the following PXE boot script:")
+	log.Debugf("%s", content)
 	script, err := d.getClient().CreateStartupScript(d.MachineName, content, "pxe")
 	if err != nil {
 		return err
@@ -492,13 +570,15 @@ func (d *Driver) getCloudConfig() (string, error) {
 		PrivateNet   bool
 		CustomScript bool
 	}
+
 	const tpl = `#cloud-config
 hostname: {{.HostName}}
 ssh_authorized_keys:
-  - {{.SSHkey}}
+  - {{.SSHkey}}{{if not .CustomScript}}
 write_files:
   - path: /opt/rancher/bin/start.sh
     permissions: "0755"
+    owner: root
     content: |
       #!/bin/sh
       mount | grep /dev/vda >/dev/null
@@ -507,31 +587,40 @@ write_files:
         exit 0
       fi
       sudo dd if=/dev/zero of=/dev/vda bs=1M count=1
-      sudo reboot{{if not .CustomScript}}{{if .PrivateNet}}
+      logger -t start.sh "Prepared /dev/vda for use as Rancher state disk. Rebooting."
+      sudo reboot
 rancher:
   network:
     interfaces:
       eth0:
-        dhcp: true
+        dhcp: true{{if .PrivateNet}}
       eth1:
         address: $private_ipv4/16
         mtu: 1450{{end}}{{end}}
 `
 	var buffer bytes.Buffer
+	var publicKey string
 
-	publicKey, err := ioutil.ReadFile(d.publicSSHKeyPath())
-	if err != nil {
-		return "", err
+	if d.VultrPublicKey != "" {
+		publicKey = d.VultrPublicKey
+	} else {
+		keyByte, err := ioutil.ReadFile(d.publicSSHKeyPath())
+		if err != nil {
+			return "", err
+		}
+		publicKey = string(keyByte)
 	}
-	config := userData{HostName: d.MachineName, SSHkey: string(publicKey), PrivateNet: d.PrivateNetworking, CustomScript: d.HasCustomScript}
 
+	config := userData{HostName: d.MachineName, SSHkey: publicKey, PrivateNet: d.PrivateNetworking, CustomScript: d.HasCustomScript}
 	tmpl, err := template.New("cloud-config").Parse(tpl)
 	if err != nil {
 		return "", err
 	}
+
 	err = tmpl.Execute(&buffer, config)
 	if err != nil {
 		return "", err
 	}
+
 	return buffer.String(), nil
 }

@@ -13,7 +13,7 @@ dependencies:
     - ln -s ~/$CIRCLE_PROJECT_REPONAME ~/.go_workspace/src/github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME
     - make deps
   override:
-    - echo "deps are vendored don't run go build"
+    - go get -t -d -v ./...
   post:
     - git config user.name "Circle CI Build Bot"
     - git config user.email "no-reply@circleci.com"

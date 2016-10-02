@@ -3,6 +3,8 @@
 NAME=docker-machine-driver-vultr
 VERSION := $(shell cat VERSION)
 
+GOFILES_NOVENDOR = $(shell find . -type f -name '*.go' -not -path "./vendor/*")
+
 ifneq ($(CIRCLE_BUILD_NUM),)
 	BUILD:=$(VERSION)-$(CIRCLE_BUILD_NUM)
 else
@@ -49,12 +51,12 @@ deps:
 	go get -u github.com/tcnksm/ghr
 
 vet:
-	@if [ -n "$(shell gofmt -l .)" ]; then \
+	@if [ -n "$(shell gofmt -l ${GOFILES_NOVENDOR})" ]; then \
 		echo 1>&2 'The following files need to be formatted:'; \
-		gofmt -l .; \
+		gofmt -l ${GOFILES_NOVENDOR}; \
 		exit 1; \
 	fi
-	godep go vet .
+	@godep go vet .
 
 test:
-	godep go test -race ./...
+	godep go test
