@@ -49,10 +49,11 @@ Command line flags:
  - `--vultr-ros-version`: RancherOS version to use if an OSID was not specified (e.g. 'v0.6.0', 'latest').
  - `--vultr-pxe-script`: PXE boot script ID. Requires the 'custom OS' ('--vultr-os-id=159')
  - `--vultr-ssh-key-id`: Use an existing SSH key in your Vultr account instead of generating a new one.
- - `--vultr-ipv6`: Enable IPv6 support for the VPS. 
+ - `--vultr-ipv6`: Enable IPv6 support for the VPS.
  - `--vultr-private-networking`: Enable private networking support for the VPS.
  - `--vultr-backups`: Enable automatic backups for the VPS.
  - `--vultr-userdata`: Path to file with cloud-init user-data.
+ - `--vultr-snapshot-id`: Using snapshot to create host.
 
 If the OS ID is not specified, the driver defaults to using [RancherOS](http://rancher.com/rancher-os/) as operating system for the instance.
 A particular RancherOS version can be selected using the `--vultr-ros-version` flag.
@@ -77,6 +78,7 @@ The operating system must support Cloud-init and be configured to use the `ec2` 
 | `--vultr-private-networking`    | `VULTR_PRIVATE_NETWORKING`   | `false`                     |
 | `--vultr-backups`               | `VULTR_BACKUPS`              | `false`                     |
 | `--vultr-userdata`              | `VULTR_USERDATA`             | -                           |
+| `--vultr-snapshot-id`           | `VULTR_SNAPSHOT`             | -                           |
 
 ### Find available plans for all Vultr locations
 
