@@ -279,7 +279,7 @@ func (d *Driver) Create() error {
 		d.IPAddress = machine.MainIP
 		d.PrivateIP = machine.InternalIP
 
-		if d.IPAddress != "" && d.IPAddress != "0" {
+		if d.IPAddress != "" && d.IPAddress != "0" && d.IPAddress != "0.0.0.0" {
 			break
 		}
 		log.Debug("IP address not yet available")
@@ -351,7 +351,7 @@ func (d *Driver) GetURL() (string, error) {
 }
 
 func (d *Driver) GetIP() (string, error) {
-	if d.IPAddress == "" || d.IPAddress == "0" {
+	if d.IPAddress == "" || d.IPAddress == "0" || d.IPAddress == "0.0.0.0" {
 		return "", fmt.Errorf("IP address is not set")
 	}
 
