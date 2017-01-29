@@ -21,6 +21,7 @@ import (
 type Driver struct {
 	*drivers.BaseDriver
 	APIKey            string
+	APIEndpoint       string
 	MachineID         string
 	PrivateIP         string
 	OSID              int
@@ -39,12 +40,13 @@ type Driver struct {
 }
 
 const (
-	defaultOS         = 159
-	defaultRegion     = 1
-	defaultPlan       = 29
-	defaultSSHuser    = "root"
-	defaultROSVersion = "v0.5.0"
-	clientMaxRetries  = 5
+	defaultOS          = 159
+	defaultRegion      = 1
+	defaultPlan        = 29
+	defaultSSHuser     = "root"
+	defaultROSVersion  = "v0.5.0"
+	clientMaxRetries   = 5
+	defaultAPIEndpoint = ""
 )
 
 // GetCreateFlags registers the flags this driver adds to
@@ -55,6 +57,12 @@ func (d *Driver) GetCreateFlags() []mcnflag.Flag {
 			EnvVar: "VULTR_API_KEY",
 			Name:   "vultr-api-key",
 			Usage:  "Vultr API key",
+		},
+		mcnflag.StringFlag{
+			EnvVar: "VULTR_API_ENDPOINT",
+			Name:   "vultr-api-endpoint",
+			Usage:  "Vultr API endpoint",
+			Value:  defaultAPIEndpoint,
 		},
 		mcnflag.StringFlag{
 			EnvVar: "VULTR_SSH_USER",
@@ -143,6 +151,7 @@ func (d *Driver) DriverName() string {
 
 func (d *Driver) SetConfigFromFlags(flags drivers.DriverOptions) error {
 	d.APIKey = flags.String("vultr-api-key")
+	d.APIEndpoint = flags.String("vultr-api-endpoint")
 	d.OSID = flags.Int("vultr-os-id")
 	d.ROSVersion = flags.String("vultr-ros-version")
 	d.RegionID = flags.Int("vultr-region-id")
@@ -467,7 +476,11 @@ func (d *Driver) Kill() error {
 
 func (d *Driver) getClient() *vultr.Client {
 	if d.client == nil {
-		d.client = vultr.NewClient(d.APIKey, &vultr.Options{MaxRetries: clientMaxRetries})
+		opts := &vultr.Options{
+			MaxRetries: clientMaxRetries,
+			Endpoint:   d.APIEndpoint,
+		}
+		d.client = vultr.NewClient(d.APIKey, opts)
 	}
 
 	return d.client
