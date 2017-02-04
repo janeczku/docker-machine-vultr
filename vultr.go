@@ -36,6 +36,7 @@ type Driver struct {
 	ScriptID          int
 	HasCustomScript   bool
 	UserDataFile      string
+	SnapshotID        string
 	client            *vultr.Client
 }
 
@@ -124,6 +125,11 @@ func (d *Driver) GetCreateFlags() []mcnflag.Flag {
 			Name:   "vultr-userdata",
 			Usage:  "Path to file with Cloud-init User Data",
 		},
+		mcnflag.StringFlag{
+			EnvVar: "VULTR_SNAPSHOT",
+			Name:   "vultr-snapshot-id",
+			Usage:  "Snapshot ID",
+		},
 	}
 }
 
@@ -162,6 +168,7 @@ func (d *Driver) SetConfigFromFlags(flags drivers.DriverOptions) error {
 	d.PrivateNetworking = flags.Bool("vultr-private-networking")
 	d.Backups = flags.Bool("vultr-backups")
 	d.UserDataFile = flags.String("vultr-userdata")
+	d.SnapshotID = flags.String("vultr-snapshot-id")
 	d.SwarmMaster = flags.Bool("swarm-master")
 	d.SwarmHost = flags.String("swarm-host")
 	d.SwarmDiscovery = flags.String("swarm-discovery")
@@ -188,6 +195,12 @@ func (d *Driver) PreCreateCheck() error {
 
 	if d.ScriptID != 0 && d.OSID != 159 {
 		return fmt.Errorf("Using PXE boot script requires 'Custom OS' (159)")
+	}
+
+	if d.SnapshotID != "" && d.OSID == defaultOS {
+		//	reassign OSID to Snapshot OSID 164, if OSID is the defaultOS.
+		//	And allow user to specify an OSID, in case there is an API update in the future.
+		d.OSID = 164
 	}
 
 	if d.SSHKeyID != "" {
@@ -271,6 +284,7 @@ func (d *Driver) Create() error {
 			AutoBackups:          d.Backups,
 			Script:               d.ScriptID,
 			UserData:             userdata,
+			Snapshot:             d.SnapshotID,
 			Hostname:             d.MachineName,
 			DontNotifyOnActivate: true,
 		})
