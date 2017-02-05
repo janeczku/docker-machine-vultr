@@ -12,8 +12,8 @@
 		},
 		{
 			"ImportPath": "github.com/JamesClonk/vultr/lib",
-			"Comment": "v1.9-5-ge2c62e5",
-			"Rev": "e2c62e513c91feeb409764a8e6ab42e8ecc65df7"
+			"Comment": "1.12.0-11-g9ec0427",
+			"Rev": "9ec0427d51411407c0402b093a1771cb75af9679"
 		},
 		{
 			"ImportPath": "github.com/davecgh/go-spew/spew",
@@ -122,10 +122,15 @@
 		{
 			"ImportPath": "golang.org/x/crypto/ssh/terminal",
 			"Rev": "05d11b2ca14108dfc7f74f4f66b28c7fe92e1fd0"
-		}
+		},
 		{
 			"ImportPath": "golang.org/x/crypto/ed25519",
 			"Rev": "05d11b2ca14108dfc7f74f4f66b28c7fe92e1fd0"
 		},
+		{
+			"ImportPath": "github.com/JamesClonk/vultr/vendor/github.com/juju/ratelimit",
+			"Comment": "1.12.0-11-g9ec0427",
+			"Rev": "9ec0427d51411407c0402b093a1771cb75af9679"
+		}
 	]
 }
