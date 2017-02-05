@@ -44,58 +44,58 @@
 		},
 		{
 			"ImportPath": "github.com/docker/machine/libmachine/drivers",
-			"Comment": "v0.8.2",
-			"Rev": "e18a9193d49de4a45ba4b1b6379cad7775481cd2"
+			"Comment": "docs-v0.8.2-2016-09-26-120-g2e00a25",
+			"Rev": "2e00a2591b4ea172487bf814b72d39bf450f78bd"
 		},
 		{
 			"ImportPath": "github.com/docker/machine/libmachine/drivers/plugin",
-			"Comment": "v0.8.2",
-			"Rev": "e18a9193d49de4a45ba4b1b6379cad7775481cd2"
+			"Comment": "docs-v0.8.2-2016-09-26-120-g2e00a25",
+			"Rev": "2e00a2591b4ea172487bf814b72d39bf450f78bd"
 		},
 		{
 			"ImportPath": "github.com/docker/machine/libmachine/drivers/plugin/localbinary",
-			"Comment": "v0.8.2",
-			"Rev": "e18a9193d49de4a45ba4b1b6379cad7775481cd2"
+			"Comment": "docs-v0.8.2-2016-09-26-120-g2e00a25",
+			"Rev": "2e00a2591b4ea172487bf814b72d39bf450f78bd"
 		},
 		{
 			"ImportPath": "github.com/docker/machine/libmachine/drivers/rpc",
-			"Comment": "v0.8.2",
-			"Rev": "e18a9193d49de4a45ba4b1b6379cad7775481cd2"
+			"Comment": "docs-v0.8.2-2016-09-26-120-g2e00a25",
+			"Rev": "2e00a2591b4ea172487bf814b72d39bf450f78bd"
 		},
 		{
 			"ImportPath": "github.com/docker/machine/libmachine/log",
-			"Comment": "v0.8.2",
-			"Rev": "e18a9193d49de4a45ba4b1b6379cad7775481cd2"
+			"Comment": "docs-v0.8.2-2016-09-26-120-g2e00a25",
+			"Rev": "2e00a2591b4ea172487bf814b72d39bf450f78bd"
 		},
 		{
 			"ImportPath": "github.com/docker/machine/libmachine/mcnflag",
-			"Comment": "v0.8.2",
-			"Rev": "e18a9193d49de4a45ba4b1b6379cad7775481cd2"
+			"Comment": "docs-v0.8.2-2016-09-26-120-g2e00a25",
+			"Rev": "2e00a2591b4ea172487bf814b72d39bf450f78bd"
 		},
 		{
 			"ImportPath": "github.com/docker/machine/libmachine/mcnutils",
-			"Comment": "v0.8.2",
-			"Rev": "e18a9193d49de4a45ba4b1b6379cad7775481cd2"
+			"Comment": "docs-v0.8.2-2016-09-26-120-g2e00a25",
+			"Rev": "2e00a2591b4ea172487bf814b72d39bf450f78bd"
 		},
 		{
 			"ImportPath": "github.com/docker/machine/libmachine/ssh",
-			"Comment": "v0.8.2",
-			"Rev": "e18a9193d49de4a45ba4b1b6379cad7775481cd2"
+			"Comment": "docs-v0.8.2-2016-09-26-120-g2e00a25",
+			"Rev": "2e00a2591b4ea172487bf814b72d39bf450f78bd"
 		},
 		{
 			"ImportPath": "github.com/docker/machine/libmachine/state",
-			"Comment": "v0.8.2",
-			"Rev": "e18a9193d49de4a45ba4b1b6379cad7775481cd2"
+			"Comment": "docs-v0.8.2-2016-09-26-120-g2e00a25",
+			"Rev": "2e00a2591b4ea172487bf814b72d39bf450f78bd"
 		},
 		{
 			"ImportPath": "github.com/docker/machine/libmachine/version",
-			"Comment": "v0.8.2",
-			"Rev": "e18a9193d49de4a45ba4b1b6379cad7775481cd2"
+			"Comment": "docs-v0.8.2-2016-09-26-120-g2e00a25",
+			"Rev": "2e00a2591b4ea172487bf814b72d39bf450f78bd"
 		},
 		{
 			"ImportPath": "github.com/docker/machine/version",
-			"Comment": "v0.8.2",
-			"Rev": "e18a9193d49de4a45ba4b1b6379cad7775481cd2"
+			"Comment": "docs-v0.8.2-2016-09-26-120-g2e00a25",
+			"Rev": "2e00a2591b4ea172487bf814b72d39bf450f78bd"
 		},
 		{
 			"ImportPath": "github.com/juju/ratelimit",
@@ -131,6 +131,26 @@
 			"ImportPath": "github.com/JamesClonk/vultr/vendor/github.com/juju/ratelimit",
 			"Comment": "1.12.0-11-g9ec0427",
 			"Rev": "9ec0427d51411407c0402b093a1771cb75af9679"
+		},
+		{
+			"ImportPath": "github.com/docker/machine/vendor/github.com/docker/docker/pkg/term",
+			"Comment": "docs-v0.8.2-2016-09-26-120-g2e00a25",
+			"Rev": "2e00a2591b4ea172487bf814b72d39bf450f78bd"
+		},
+		{
+			"ImportPath": "github.com/docker/machine/vendor/golang.org/x/crypto/ssh",
+			"Comment": "docs-v0.8.2-2016-09-26-120-g2e00a25",
+			"Rev": "2e00a2591b4ea172487bf814b72d39bf450f78bd"
+		},
+		{
+			"ImportPath": "github.com/docker/machine/vendor/golang.org/x/crypto/ssh/terminal",
+			"Comment": "docs-v0.8.2-2016-09-26-120-g2e00a25",
+			"Rev": "2e00a2591b4ea172487bf814b72d39bf450f78bd"
+		},
+		{
+			"ImportPath": "github.com/docker/machine/vendor/golang.org/x/crypto/curve25519",
+			"Comment": "docs-v0.8.2-2016-09-26-120-g2e00a25",
+			"Rev": "2e00a2591b4ea172487bf814b72d39bf450f78bd"
 		}
 	]
 }
