@@ -22,10 +22,12 @@ Provision [Vultr](https://www.vultr.com/) cloud instances using the `docker-mach
 
 ## Installation
 
-Requirement: [Docker Machine >= 0.5.1](https://github.com/docker/machine)
+Prerequisites:
 
-Download the `docker-machine-driver-vultr` binary from the release page.
-Extract the archive and copy the binary to a folder located in your `PATH` and make sure it's executable (e.g. `chmod +x /usr/local/bin/docker-machine-driver-vultr`).
+[Docker Machine >= 0.5.1](https://github.com/docker/machine/releases) (v0.9.0 or later is recommended)
+
+Download the release tarball matching your platform/architecture from the release page.
+Extract the tarball and copy `docker-machine-driver-vultr` to a folder in your `PATH` and make sure it's executable.
 
 ## Usage instructions
 
@@ -35,9 +37,9 @@ Grab your API key from the [Vultr control panel](https://my.vultr.com/settings/)
 
     docker-machine create --driver vultr --vultr-api-key=abc123 rancheros-machine
 
-**Example for creating a new machine running Ubuntu 14.04:**
+**Example for creating a new machine running Ubuntu 16.04:**
 
-    docker-machine create --driver vultr --vultr-api-key=abc123 --vultr-os-id=160 ubuntu-machine
+    docker-machine create --driver vultr --vultr-api-key=abc123 --vultr-os-id=215 ubuntu-machine
 
 Command line flags:
 
@@ -56,12 +58,12 @@ Command line flags:
  - `--vultr-snapshot-id`: Using snapshot to create host.
  - `--vultr-api-endpoint`: Override default Vultr API endpoint URL.
 
-If the OS ID is not specified, the driver defaults to using [RancherOS](http://rancher.com/rancher-os/) as operating system for the instance.
-A particular RancherOS version can be selected using the `--vultr-ros-version` flag.
+If the OS ID is not specified, [RancherOS](http://rancher.com/rancher-os/) will be used as operating system for the instance.
+In that case the SSH user is set to `rancher`. You can select a specific RancherOS version by specifying the `--vultr-ros-version` flag.
 
 ### PXE deployment
-You can boot a custom OS using a PXE boot script that you created in your Vultr account panel by supplying it's ID with the `--vultr-pxe-script` flag and setting `--vultr-os-id` to `159`.
-The operating system must support Cloud-init and be configured to use the `ec2` datasource type.
+You can boot a custom OS using a PXE boot script that you created in your Vultr account panel by passing it's ID with the `--vultr-pxe-script` flag and setting `--vultr-os-id` to `159`.
+The operating system must support cloud-init and be configured to use the `ec2` datasource type.
 
  Environment variables and default values:
 
@@ -70,9 +72,9 @@ The operating system must support Cloud-init and be configured to use the `ec2` 
 | **`--vultr-api-key`**           | `VULTR_API_KEY`              | -                           |
 | `--vultr-ssh-user`              | `VULTR_SSH_USER`             | `root`                      |
 | `--vultr-region-id`             | `VULTR_REGION`               | 1 (*New Jersey*)            |
-| `--vultr-plan-id`               | `VULTR_PLAN`                 | 29 (*768 MB RAM,15 GB SSD*) |
+| `--vultr-plan-id`               | `VULTR_PLAN`                 | 93 (*1024 MB RAM,20 GB SSD*)|
 | `--vultr-os-id`                 | `VULTR_OS`                   | -                           |
-| `--vultr-ros-version`           | `VULTR_ROS_VERSION`          | v0.5.0                      |
+| `--vultr-ros-version`           | `VULTR_ROS_VERSION`          | v0.7.1                      |
 | `--vultr-pxe-script`            | `VULTR_PXE_SCRIPT`           | -                           |
 | `--vultr-ssh-key-id`            | `VULTR_SSH_KEY`              | -                           |
 | `--vultr-ipv6`                  | `VULTR_IPV6`                 | `false`                     |
@@ -84,6 +86,6 @@ The operating system must support Cloud-init and be configured to use the `ec2` 
 
 ### Find available plans for all Vultr locations
 
-Check out [vultr-status.appspot.com](http://vultr-status.appspot.com) for a live listing of the available plans per region. Get the applicable `--vultr-region-id` and `--vultr-plan-id` parameters with the click of a button.
+Check out [vultr-status.appspot.com](http://vultr-status.appspot.com) for a live listing of the available plans per region. Get the corresponding `--vultr-region-id` and `--vultr-plan-id` parameters with the click of a button.
 
 [![vultr-status website](vultr-status-screenshot.png?raw=true)](http://vultr-status.appspot.com)

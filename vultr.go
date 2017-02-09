@@ -43,7 +43,7 @@ type Driver struct {
 const (
 	defaultOS          = 159
 	defaultRegion      = 1
-	defaultPlan        = 29
+	defaultPlan        = 93
 	defaultSSHuser     = "root"
 	defaultROSVersion  = "v0.7.1"
 	clientMaxRetries   = 5
@@ -74,25 +74,25 @@ func (d *Driver) GetCreateFlags() []mcnflag.Flag {
 		mcnflag.IntFlag{
 			EnvVar: "VULTR_REGION",
 			Name:   "vultr-region-id",
-			Usage:  "Vultr region ID. Default: New Jersey",
+			Usage:  "Vultr region ID. Default: 1 (New Jersey)",
 			Value:  defaultRegion,
 		},
 		mcnflag.IntFlag{
 			EnvVar: "VULTR_PLAN",
 			Name:   "vultr-plan-id",
-			Usage:  "Vultr plan ID. Default: 768 MB RAM",
+			Usage:  "Vultr plan ID. Default: 93 (1024 MB RAM)",
 			Value:  defaultPlan,
 		},
 		mcnflag.IntFlag{
 			EnvVar: "VULTR_OS",
 			Name:   "vultr-os-id",
-			Usage:  "Vultr operating system ID",
+			Usage:  "Vultr operating system ID. Default: RancherOS",
 			Value:  defaultOS,
 		},
 		mcnflag.StringFlag{
 			EnvVar: "VULTR_ROS_VERSION",
 			Name:   "vultr-ros-version",
-			Usage:  "RancherOS version to use for the VM (eg. v0.6.0 or latest)",
+			Usage:  "RancherOS version to use (eg. v0.6.0). Default: latest",
 			Value:  defaultROSVersion,
 		},
 		mcnflag.IntFlag{
@@ -238,7 +238,7 @@ func (d *Driver) Create() error {
 		d.SSHKeyID = key.ID
 	}
 
-	log.Info("Creating Vultr VPS...")
+	log.Info("Creating Vultr VPS")
 	var userdata string
 	var err error
 	if d.OSID == 159 {
@@ -246,12 +246,13 @@ func (d *Driver) Create() error {
 		if d.ScriptID != 0 {
 			d.HasCustomScript = true
 		} else {
-			log.Infof("Using RancherOS (%s)", d.ROSVersion)
+			log.Infof("Provisioning RancherOS (%s) with persistent state partition", d.ROSVersion)
 			d.SSHUser = "rancher"
 			if err := d.createBootScript(); err != nil {
 				return err
 			}
-			log.Debugf("Created RancherOS PXE boot script (ID %d)", d.ScriptID)
+
+			log.Debugf("Created RancherOS PXE boot script: ID %d", d.ScriptID)
 		}
 
 		userdata, err = d.getCloudConfig()
