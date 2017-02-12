@@ -60,7 +60,7 @@ Command line flags:
  - `--vultr-api-endpoint`: Override default Vultr API endpoint URL.
 
 If the OS ID is not specified, [RancherOS](http://rancher.com/rancher-os/) will be used as operating system for the instance.
-In that case the SSH user is set to `rancher`. You can select a specific RancherOS version by specifying the `--vultr-ros-version` flag.
+You can select a specific RancherOS version by specifying the `--vultr-ros-version` flag.
 
 ### PXE deployment
 You can boot a custom OS using a PXE boot script that you created in your Vultr account panel by passing it's ID with the `--vultr-pxe-script` flag and setting `--vultr-os-id` to `159`.
