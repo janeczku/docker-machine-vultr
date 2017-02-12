@@ -30,14 +30,14 @@ dist: dist-clean
 	mkdir -p dist/linux/armhf && GOOS=linux GOARCH=arm GOARM=6 godep go build -a -ldflags "$(LDFLAGS)" -o dist/linux/armhf/$(NAME) ./bin
 	mkdir -p dist/darwin/amd64 && GOOS=darwin GOARCH=amd64 godep go build -a -ldflags "$(LDFLAGS)" -o dist/darwin/amd64/$(NAME) ./bin
 	mkdir -p dist/windows/amd64 && CGO_ENABLED=0 GOOS=windows GOARCH=amd64 godep go build -a -ldflags "$(LDFLAGS)" -o dist/windows/amd64/$(NAME).exe ./bin
-	tar -cvzf release/$(NAME)-$(VERSION)-linux-amd64.tar.gz -C dist/linux/amd64 $(NAME)
-	cd $(shell pwd)/release && md5sum $(NAME)-$(VERSION)-linux-amd64.tar.gz > $(NAME)-$(VERSION)-linux-amd64.tar.gz.md5
-	tar -cvzf release/$(NAME)-$(VERSION)-linux-armhf.tar.gz -C dist/linux/armhf $(NAME)
-	cd $(shell pwd)/release && md5sum $(NAME)-$(VERSION)-linux-armhf.tar.gz > $(NAME)-$(VERSION)-linux-armhf.tar.gz.md5
-	tar -cvzf release/$(NAME)-$(VERSION)-darwin-amd64.tar.gz -C dist/darwin/amd64 $(NAME)
-	cd $(shell pwd)/release && md5sum $(NAME)-$(VERSION)-darwin-amd64.tar.gz > $(NAME)-$(VERSION)-darwin-amd64.tar.gz.md5
-	tar -cvzf release/$(NAME)-$(VERSION)-windows-amd64.tar.gz -C dist/windows/amd64 $(NAME).exe
-	cd $(shell pwd)/release && md5sum $(NAME)-$(VERSION)-windows-amd64.tar.gz > $(NAME)-$(VERSION)-windows-amd64.tar.gz.md5
+	tar -cvzf release/$(NAME)-$(VERSION)-Linux-x86_64.tar.gz -C dist/linux/amd64 $(NAME)
+	cd $(shell pwd)/release && md5sum $(NAME)-$(VERSION)-Linux-x86_64.tar.gz > $(NAME)-$(VERSION)-Linux-x86_64.tar.gz.md5
+	tar -cvzf release/$(NAME)-$(VERSION)-Linux-armv7l.tar.gz -C dist/linux/armhf $(NAME)
+	cd $(shell pwd)/release && md5sum $(NAME)-$(VERSION)-Linux-armv7l.tar.gz > $(NAME)-$(VERSION)-Linux-armv7l.tar.gz.md5
+	tar -cvzf release/$(NAME)-$(VERSION)-Darwin-x86_64.tar.gz -C dist/darwin/amd64 $(NAME)
+	cd $(shell pwd)/release && md5sum $(NAME)-$(VERSION)-Darwin-x86_64.tar.gz > $(NAME)-$(VERSION)-Darwin-x86_64.tar.gz.md5
+	tar -cvzf release/$(NAME)-$(VERSION)-Windows-x86_64.tar.gz -C dist/windows/amd64 $(NAME).exe
+	cd $(shell pwd)/release && md5sum $(NAME)-$(VERSION)-Windows-x86_64.tar.gz > $(NAME)-$(VERSION)-Windows-x86_64.tar.gz.md5
 
 release: dist
 	ghr -u janeczku -r docker-machine-vultr --replace $(VERSION) release/
