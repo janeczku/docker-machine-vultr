@@ -33,8 +33,9 @@ type Driver struct {
 	IPv6              bool
 	Backups           bool
 	PrivateNetworking bool
-	ScriptID          int
-	HasCustomScript   bool
+	PxeScriptID       int
+	BootScriptID      int
+	CustomPxeScript   bool
 	UserDataFile      string
 	SnapshotID        string
 	client            *vultr.Client
@@ -80,55 +81,60 @@ func (d *Driver) GetCreateFlags() []mcnflag.Flag {
 		mcnflag.IntFlag{
 			EnvVar: "VULTR_PLAN",
 			Name:   "vultr-plan-id",
-			Usage:  "Vultr plan ID. Default: 93 (1024 MB RAM)",
+			Usage:  "Vultr plan ID. Default: 93 (1024 MB RAM).",
 			Value:  defaultPlan,
 		},
 		mcnflag.IntFlag{
 			EnvVar: "VULTR_OS",
 			Name:   "vultr-os-id",
-			Usage:  "Vultr operating system ID. Default: RancherOS",
+			Usage:  "Vultr operating system ID. Default: RancherOS.",
 			Value:  defaultOS,
 		},
 		mcnflag.StringFlag{
 			EnvVar: "VULTR_ROS_VERSION",
 			Name:   "vultr-ros-version",
-			Usage:  "RancherOS version to use (eg. v0.6.0). Default: latest",
+			Usage:  "RancherOS version to use (eg. v0.6.0). Default: latest.",
 			Value:  defaultROSVersion,
 		},
 		mcnflag.IntFlag{
 			EnvVar: "VULTR_PXE_SCRIPT",
 			Name:   "vultr-pxe-script",
-			Usage:  "PXE boot script ID",
+			Usage:  "ID of a PXE script in your Vultr account.",
+		},
+		mcnflag.IntFlag{
+			EnvVar: "VULTR_BOOT_SCRIPT",
+			Name:   "vultr-boot-script",
+			Usage:  "ID of a boot script in your Vultr account. Mutually exclusive of --vultr-pxe-script.",
 		},
 		mcnflag.StringFlag{
 			EnvVar: "VULTR_SSH_KEY",
 			Name:   "vultr-ssh-key-id",
-			Usage:  "ID of an existing SSH key in your Vultr account",
+			Usage:  "ID of an existing SSH key in your Vultr account.",
 		},
 		mcnflag.BoolFlag{
 			EnvVar: "VULTR_IPV6",
 			Name:   "vultr-ipv6",
-			Usage:  "Enable IPv6 for VPS",
+			Usage:  "Enable IPv6 for the VPS.",
 		},
 		mcnflag.BoolFlag{
 			EnvVar: "VULTR_PRIVATE_NETWORKING",
 			Name:   "vultr-private-networking",
-			Usage:  "Enable private networking for VPS",
+			Usage:  "Enable private networking for the VPS.",
 		},
 		mcnflag.BoolFlag{
 			EnvVar: "VULTR_BACKUPS",
 			Name:   "vultr-backups",
-			Usage:  "Enable automatic backups for VPS",
+			Usage:  "Enable automatic backups for the VPS.",
 		},
 		mcnflag.StringFlag{
 			EnvVar: "VULTR_USERDATA",
 			Name:   "vultr-userdata",
-			Usage:  "Path to file with Cloud-init User Data",
+			Usage:  "Path to a file containing cloud-init user data.",
 		},
 		mcnflag.StringFlag{
 			EnvVar: "VULTR_SNAPSHOT",
 			Name:   "vultr-snapshot-id",
-			Usage:  "Snapshot ID",
+			Usage:  "ID of an existing Snapshot in your Vultr account.",
 		},
 	}
 }
@@ -162,7 +168,8 @@ func (d *Driver) SetConfigFromFlags(flags drivers.DriverOptions) error {
 	d.ROSVersion = flags.String("vultr-ros-version")
 	d.RegionID = flags.Int("vultr-region-id")
 	d.PlanID = flags.Int("vultr-plan-id")
-	d.ScriptID = flags.Int("vultr-pxe-script")
+	d.PxeScriptID = flags.Int("vultr-pxe-script")
+	d.BootScriptID = flags.Int("vultr-boot-script")
 	d.SSHKeyID = flags.String("vultr-ssh-key-id")
 	d.IPv6 = flags.Bool("vultr-ipv6")
 	d.PrivateNetworking = flags.Bool("vultr-private-networking")
@@ -184,17 +191,25 @@ func (d *Driver) SetConfigFromFlags(flags drivers.DriverOptions) error {
 func (d *Driver) PreCreateCheck() error {
 	if d.UserDataFile != "" {
 		if d.OSID == 159 {
-			return fmt.Errorf("User Data is currently not supported with 'Custom OS' (159)")
+			return fmt.Errorf("--vultr-userdata does currently not support 'Custom OS' (OS ID 159)")
 		}
 		if _, err := os.Stat(d.UserDataFile); os.IsNotExist(err) {
-			return fmt.Errorf("Unable to find User Data file at %s", d.UserDataFile)
+			return fmt.Errorf("Unable to find user data file at %s", d.UserDataFile)
 		}
 	}
 
 	log.Info("Validating Vultr VPS parameters...")
 
-	if d.ScriptID != 0 && d.OSID != 159 {
-		return fmt.Errorf("Using PXE boot script requires 'Custom OS' (159)")
+	if d.PxeScriptID != 0 && d.BootScriptID != 0 {
+		return fmt.Errorf("--vultr-pxe-script and --vultr-boot-script are mutually exclusive")
+	}
+
+	if d.PxeScriptID != 0 && d.OSID != 159 {
+		return fmt.Errorf("--vultr-pxe-script requires the 'Custom OS' (OS ID 159)")
+	}
+
+	if d.BootScriptID != 0 && d.OSID == 159 {
+		return fmt.Errorf("--vultr-boot-script can't be used with the 'Custom OS' (OS ID 159)")
 	}
 
 	if d.SnapshotID != "" && d.OSID == defaultOS {
@@ -243,16 +258,16 @@ func (d *Driver) Create() error {
 	var err error
 	if d.OSID == 159 {
 		log.Info("Using PXE boot")
-		if d.ScriptID != 0 {
-			d.HasCustomScript = true
+		if d.PxeScriptID != 0 {
+			d.CustomPxeScript = true
 		} else {
-			log.Infof("Provisioning RancherOS (%s) with persistent state partition", d.ROSVersion)
+			log.Infof("Provisioning RancherOS (%s). SSH user set to 'rancher'.", d.ROSVersion)
 			d.SSHUser = "rancher"
 			if err := d.createBootScript(); err != nil {
 				return err
 			}
 
-			log.Debugf("Created RancherOS PXE boot script: ID %d", d.ScriptID)
+			log.Debugf("Created RancherOS PXE script: ID %d", d.PxeScriptID)
 		}
 
 		userdata, err = d.getCloudConfig()
@@ -268,8 +283,16 @@ func (d *Driver) Create() error {
 	}
 
 	if userdata != "" {
-		log.Debugf("Using the following Cloud-init User Data:")
+		log.Debugf("Using the following cloud-init user data:")
 		log.Debugf("%s", userdata)
+	}
+
+	var scriptID int
+	switch {
+	case d.PxeScriptID != 0:
+		scriptID = d.PxeScriptID
+	case d.BootScriptID != 0:
+		scriptID = d.BootScriptID
 	}
 
 	client := d.getClient()
@@ -283,7 +306,7 @@ func (d *Driver) Create() error {
 			IPV6:                 d.IPv6,
 			PrivateNetworking:    d.PrivateNetworking,
 			AutoBackups:          d.Backups,
-			Script:               d.ScriptID,
+			Script:               scriptID,
 			UserData:             userdata,
 			Snapshot:             d.SnapshotID,
 			Hostname:             d.MachineName,
@@ -442,10 +465,10 @@ func (d *Driver) Remove() error {
 		}
 	}
 
-	if d.ScriptID != 0 && !d.HasCustomScript {
-		if err := client.DeleteStartupScript(strconv.Itoa(d.ScriptID)); err != nil {
+	if d.PxeScriptID != 0 && !d.CustomPxeScript {
+		if err := client.DeleteStartupScript(strconv.Itoa(d.PxeScriptID)); err != nil {
 			if strings.Contains(err.Error(), "Check SCRIPTID") {
-				log.Infof("PXE boot script doesn't exist, assuming it is already deleted")
+				log.Infof("PXE script doesn't exist, assuming it is already deleted")
 			} else {
 				return err
 			}
@@ -567,7 +590,7 @@ func (d *Driver) validatePlan() error {
 	return fmt.Errorf("PlanID %d not available in the chosen region. Available plans for RegionID %d: %v", d.PlanID, d.RegionID, plans)
 }
 
-// RancherOS - Create iPXE boot script
+// RancherOS - Create iPXE script
 func (d *Driver) createBootScript() error {
 	content := `#!ipxe
 set base-url http://releases.rancher.com/os/%s
@@ -576,13 +599,13 @@ initrd ${base-url}/initrd
 boot`
 
 	content = fmt.Sprintf(content, d.ROSVersion)
-	log.Debugf("Using the following PXE boot script:")
+	log.Debugf("Using the following PXE script:")
 	log.Debugf("%s", content)
 	script, err := d.getClient().CreateStartupScript(d.MachineName, content, "pxe")
 	if err != nil {
 		return err
 	}
-	d.ScriptID, err = strconv.Atoi(script.ID)
+	d.PxeScriptID, err = strconv.Atoi(script.ID)
 	if err != nil {
 		return err
 	}
@@ -639,7 +662,7 @@ rancher:
 		publicKey = string(keyByte)
 	}
 
-	config := userData{HostName: d.MachineName, SSHkey: publicKey, PrivateNet: d.PrivateNetworking, CustomScript: d.HasCustomScript}
+	config := userData{HostName: d.MachineName, SSHkey: publicKey, PrivateNet: d.PrivateNetworking, CustomScript: d.CustomPxeScript}
 	tmpl, err := template.New("cloud-config").Parse(tpl)
 	if err != nil {
 		return "", err
