@@ -44,7 +44,7 @@ type Driver struct {
 const (
 	defaultOS          = 159
 	defaultRegion      = 1
-	defaultPlan        = 93
+	defaultPlan        = 201
 	defaultSSHuser     = "root"
 	defaultROSVersion  = "v0.7.1"
 	clientMaxRetries   = 5
@@ -81,7 +81,7 @@ func (d *Driver) GetCreateFlags() []mcnflag.Flag {
 		mcnflag.IntFlag{
 			EnvVar: "VULTR_PLAN",
 			Name:   "vultr-plan-id",
-			Usage:  "Vultr plan ID. Default: 93 (1024 MB RAM).",
+			Usage:  "Vultr plan ID. Default: 201 (1024 MB RAM).",
 			Value:  defaultPlan,
 		},
 		mcnflag.IntFlag{
