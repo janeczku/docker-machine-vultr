@@ -1,9 +1,7 @@
-.PHONY : build dist dist-clean fmt release tag-release deps vet test
+.PHONY : build dist dist-clean release tag-release deps vet test lint
 
 NAME=docker-machine-driver-vultr
 VERSION := $(shell cat VERSION)
-
-GOFILES_NOVENDOR = $(shell find . -type f -name '*.go' -not -path "./vendor/*")
 
 ifneq ($(CIRCLE_BUILD_NUM),)
 	BUILD:=$(VERSION)-$(CIRCLE_BUILD_NUM)
@@ -18,6 +16,23 @@ all: build
 build:
 	mkdir -p build
 	godep go build -a -ldflags "$(LDFLAGS)" -o build/$(NAME)-$(BUILD) ./bin
+
+tag-release:
+	git tag -f `cat VERSION`
+	git push -f origin master --tags
+
+deps:
+	go get -v github.com/tcnksm/ghr
+	go get -v github.com/golang/lint/golint
+
+lint:
+	for pkg in $(go list ./... | grep -v /vendor/); do golint $pkg; done
+
+vet:
+	go vet $(go list ./... | grep -v /vendor/)
+
+test: lint vet
+	go test $(go list ./... | grep -v /vendor/)
 
 dist-clean:
 	rm -rf dist
@@ -41,22 +56,3 @@ dist: dist-clean
 
 release: dist
 	ghr -u janeczku -r docker-machine-vultr --replace $(VERSION) release/
-
-tag-release:
-	git tag -f `cat VERSION`
-	git push -f origin master --tags
-
-deps:
-	go get -u github.com/tools/godep
-	go get -u github.com/tcnksm/ghr
-
-vet:
-	@if [ -n "$(shell gofmt -l ${GOFILES_NOVENDOR})" ]; then \
-		echo 1>&2 'The following files need to be formatted:'; \
-		gofmt -l ${GOFILES_NOVENDOR}; \
-		exit 1; \
-	fi
-	@godep go vet .
-
-test:
-	godep go test

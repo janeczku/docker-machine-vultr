@@ -11,9 +11,8 @@ dependencies:
     - rm -rf ~/.go_workspace/src/github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME
     - mkdir -p ~/.go_workspace/src/github.com/$CIRCLE_PROJECT_USERNAME/
     - ln -s ~/$CIRCLE_PROJECT_REPONAME ~/.go_workspace/src/github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME
-    - make deps
   override:
-    - go get -t -d -v ./...
+    - make deps
   post:
     - git config user.name "Circle CI Build Bot"
     - git config user.email "no-reply@circleci.com"
@@ -22,8 +21,6 @@ dependencies:
     - git describe --abbrev=0 --tags
 
 test:
-  pre: 
-    - make vet
   override:
     - make test
     - make build
@@ -32,6 +29,9 @@ test:
 
 deployment:
   release:
-    branch: release
+    tag: /v.*/
+    owner: janeczku
     commands:
+      - echo `git name-rev --tags --name-only $(git rev-parse HEAD)`
+      - echo tag ${CIRCLE_TAG}
       - make release
