@@ -38,6 +38,7 @@ type Driver struct {
 	CustomPxeScript   bool
 	UserDataFile      string
 	SnapshotID        string
+	VultrTag          string
 	client            *vultr.Client
 }
 
@@ -136,6 +137,11 @@ func (d *Driver) GetCreateFlags() []mcnflag.Flag {
 			Name:   "vultr-snapshot-id",
 			Usage:  "ID of an existing Snapshot in your Vultr account.",
 		},
+		mcnflag.StringFlag{
+			EnvVar: "VULTR_TAG",
+			Name:   "vultr-tag",
+			Usage:  "Tag to assign to the VPS.",
+		},
 	}
 }
 
@@ -176,6 +182,7 @@ func (d *Driver) SetConfigFromFlags(flags drivers.DriverOptions) error {
 	d.Backups = flags.Bool("vultr-backups")
 	d.UserDataFile = flags.String("vultr-userdata")
 	d.SnapshotID = flags.String("vultr-snapshot-id")
+	d.VultrTag = flags.String("vultr-tag")
 	d.SwarmMaster = flags.Bool("swarm-master")
 	d.SwarmHost = flags.String("swarm-host")
 	d.SwarmDiscovery = flags.String("swarm-discovery")
@@ -311,6 +318,7 @@ func (d *Driver) Create() error {
 			Snapshot:             d.SnapshotID,
 			Hostname:             d.MachineName,
 			DontNotifyOnActivate: true,
+			Tag:                  d.VultrTag,
 		})
 	if err != nil {
 		return err

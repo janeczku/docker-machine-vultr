@@ -57,6 +57,7 @@ Command line flags:
  - `--vultr-backups`: Enable automatic backups for the VPS.
  - `--vultr-userdata`: Path to file with cloud-init user-data.
  - `--vultr-snapshot-id`: Using snapshot to create host.
+ - `--vultr-tag`: Tag to assign to the VPS.
  - `--vultr-api-endpoint`: Override default Vultr API endpoint URL.
 
 If the OS ID is not specified, [RancherOS](http://rancher.com/rancher-os/) will be used as operating system for the instance.
@@ -84,6 +85,7 @@ The operating system must support cloud-init and be configured to use the `ec2` 
 | `--vultr-backups`               | `VULTR_BACKUPS`              | `false`                     |
 | `--vultr-userdata`              | `VULTR_USERDATA`             | -                           |
 | `--vultr-snapshot-id`           | `VULTR_SNAPSHOT`             | -                           |
+| `--vultr-tag`                   | `VULTR_TAG`                  | -                           |
 | `--vultr-api-endpoint`          | `VULTR_API_ENDPOINT`         | -                           |
 
 ### Find available plans for all Vultr locations
