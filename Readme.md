@@ -48,7 +48,7 @@ Command line flags:
  - `--vultr-region-id`: Region the VPS will be created in (DCID). See [available Region IDs](https://www.vultr.com/api/#regions_region_list).
  - `--vultr-plan-id`: Plan to use for this VPS (VPSPLANID). See [available Plan IDs](https://www.vultr.com/api/#plans_plan_list).
  - `--vultr-os-id`: Operating system ID to use (OSID). See [available OS IDs](https://www.vultr.com/api/#os_os_list).
- - `--vultr-ros-version`: RancherOS version to use if an OSID was not specified (e.g. 'v0.6.0', 'latest').
+ - `--vultr-ros-version`: RancherOS version to use if an OSID was not specified (e.g. 'v1.0.1', 'latest').
  - `--vultr-pxe-script`: PXE script ID. Requires the 'Custom OS' ('--vultr-os-id=159')
  - `--vultr-boot-script`: Boot script ID. Mutually exclusive of '--vultr-pxe-script'.
  - `--vultr-ssh-key-id`: Use an existing SSH key in your Vultr account instead of generating a new one.
@@ -58,6 +58,7 @@ Command line flags:
  - `--vultr-userdata`: Path to file with cloud-init user-data.
  - `--vultr-snapshot-id`: Using snapshot to create host.
  - `--vultr-tag`: Tag to assign to the VPS.
+ - `--vultr-firewall-group`: ID of existing firewall group to assign.
  - `--vultr-api-endpoint`: Override default Vultr API endpoint URL.
 
 If the OS ID is not specified, [RancherOS](http://rancher.com/rancher-os/) will be used as operating system for the instance.
@@ -74,7 +75,7 @@ The operating system must support cloud-init and be configured to use the `ec2` 
 | **`--vultr-api-key`**           | `VULTR_API_KEY`              | -                           |
 | `--vultr-ssh-user`              | `VULTR_SSH_USER`             | `root`                      |
 | `--vultr-region-id`             | `VULTR_REGION`               | 1 (*New Jersey*)            |
-| `--vultr-plan-id`               | `VULTR_PLAN`                 | 93 (*1024 MB RAM,20 GB SSD*)|
+| `--vultr-plan-id`               | `VULTR_PLAN`                 | 201 (*1024 MB, 25 GB SSD*)  |
 | `--vultr-os-id`                 | `VULTR_OS`                   | -                           |
 | `--vultr-ros-version`           | `VULTR_ROS_VERSION`          | v1.0.2                      |
 | `--vultr-pxe-script`            | `VULTR_PXE_SCRIPT`           | -                           |
@@ -86,6 +87,7 @@ The operating system must support cloud-init and be configured to use the `ec2` 
 | `--vultr-userdata`              | `VULTR_USERDATA`             | -                           |
 | `--vultr-snapshot-id`           | `VULTR_SNAPSHOT`             | -                           |
 | `--vultr-tag`                   | `VULTR_TAG`                  | -                           |
+| `--vultr-firewall-group`        | `VULTR_FIREWALL_GROUP`       | -                           |
 | `--vultr-api-endpoint`          | `VULTR_API_ENDPOINT`         | -                           |
 
 ### Find available plans for all Vultr locations

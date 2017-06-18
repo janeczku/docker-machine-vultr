@@ -39,6 +39,7 @@ type Driver struct {
 	UserDataFile      string
 	SnapshotID        string
 	VultrTag          string
+	FirewallGroupID   string
 	client            *vultr.Client
 }
 
@@ -48,7 +49,7 @@ const (
 	defaultPlan        = 201
 	defaultSSHuser     = "root"
 	defaultROSVersion  = "v1.0.2"
-	clientMaxRetries   = 5
+	clientMaxRetries   = 4
 	defaultAPIEndpoint = ""
 )
 
@@ -142,6 +143,11 @@ func (d *Driver) GetCreateFlags() []mcnflag.Flag {
 			Name:   "vultr-tag",
 			Usage:  "Tag to assign to the VPS.",
 		},
+		mcnflag.StringFlag{
+			EnvVar: "VULTR_FIREWALL_GROUP",
+			Name:   "vultr-firewall-group",
+			Usage:  "ID of existing firewall group to assign.",
+		},
 	}
 }
 
@@ -183,6 +189,7 @@ func (d *Driver) SetConfigFromFlags(flags drivers.DriverOptions) error {
 	d.UserDataFile = flags.String("vultr-userdata")
 	d.SnapshotID = flags.String("vultr-snapshot-id")
 	d.VultrTag = flags.String("vultr-tag")
+	d.FirewallGroupID = flags.String("vultr-firewall-group")
 	d.SwarmMaster = flags.Bool("swarm-master")
 	d.SwarmHost = flags.String("swarm-host")
 	d.SwarmDiscovery = flags.String("swarm-discovery")
@@ -319,6 +326,7 @@ func (d *Driver) Create() error {
 			Hostname:             d.MachineName,
 			DontNotifyOnActivate: true,
 			Tag:                  d.VultrTag,
+			FirewallGroupID:      d.FirewallGroupID,
 		})
 	if err != nil {
 		return err
