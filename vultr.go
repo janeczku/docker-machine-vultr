@@ -47,7 +47,7 @@ const (
 	defaultRegion      = 1
 	defaultPlan        = 201
 	defaultSSHuser     = "root"
-	defaultROSVersion  = "v0.7.1"
+	defaultROSVersion  = "v1.0.2"
 	clientMaxRetries   = 5
 	defaultAPIEndpoint = ""
 )
@@ -94,7 +94,7 @@ func (d *Driver) GetCreateFlags() []mcnflag.Flag {
 		mcnflag.StringFlag{
 			EnvVar: "VULTR_ROS_VERSION",
 			Name:   "vultr-ros-version",
-			Usage:  "RancherOS version to use (eg. v0.6.0). Default: latest.",
+			Usage:  "RancherOS version to use (eg. v0.6.0). Default: v1.0.2",
 			Value:  defaultROSVersion,
 		},
 		mcnflag.IntFlag{

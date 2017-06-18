@@ -76,7 +76,7 @@ The operating system must support cloud-init and be configured to use the `ec2` 
 | `--vultr-region-id`             | `VULTR_REGION`               | 1 (*New Jersey*)            |
 | `--vultr-plan-id`               | `VULTR_PLAN`                 | 93 (*1024 MB RAM,20 GB SSD*)|
 | `--vultr-os-id`                 | `VULTR_OS`                   | -                           |
-| `--vultr-ros-version`           | `VULTR_ROS_VERSION`          | v0.7.1                      |
+| `--vultr-ros-version`           | `VULTR_ROS_VERSION`          | v1.0.2                      |
 | `--vultr-pxe-script`            | `VULTR_PXE_SCRIPT`           | -                           |
 | `--vultr-boot-script`           | `VULTR_BOOT_SCRIPT`          | -                           |
 | `--vultr-ssh-key-id`            | `VULTR_SSH_KEY`              | -                           |
