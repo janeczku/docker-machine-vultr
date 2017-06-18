@@ -15,7 +15,7 @@ all: build
 
 build:
 	mkdir -p build
-	godep go build -a -ldflags "$(LDFLAGS)" -o build/$(NAME)-$(BUILD) ./bin
+	go build -a -ldflags "$(LDFLAGS)" -o build/$(NAME)-$(BUILD) ./bin
 
 tag-release:
 	git tag -f `cat VERSION`
@@ -26,13 +26,13 @@ deps:
 	go get -v github.com/golang/lint/golint
 
 lint:
-	for pkg in $(go list ./... | grep -v /vendor/); do golint $pkg; done
+	@golint $$(go list ./... 2> /dev/null | grep -v /vendor/)
 
 vet:
-	go vet $(go list ./... | grep -v /vendor/)
+	@go vet $$(go list ./... 2> /dev/null | grep -v /vendor/)
 
 test: lint vet
-	go test $(go list ./... | grep -v /vendor/)
+	@go test $$(go list ./... 2> /dev/null | grep -v /vendor/)
 
 dist-clean:
 	rm -rf dist
@@ -41,10 +41,10 @@ dist-clean:
 dist: dist-clean
 	mkdir -p release
 	mkdir -p dist
-	mkdir -p dist/linux/amd64 && GOOS=linux GOARCH=amd64 godep go build -a -ldflags "$(LDFLAGS)" -o dist/linux/amd64/$(NAME) ./bin
-	mkdir -p dist/linux/armhf && GOOS=linux GOARCH=arm GOARM=6 godep go build -a -ldflags "$(LDFLAGS)" -o dist/linux/armhf/$(NAME) ./bin
-	mkdir -p dist/darwin/amd64 && GOOS=darwin GOARCH=amd64 godep go build -a -ldflags "$(LDFLAGS)" -o dist/darwin/amd64/$(NAME) ./bin
-	mkdir -p dist/windows/amd64 && CGO_ENABLED=0 GOOS=windows GOARCH=amd64 godep go build -a -ldflags "$(LDFLAGS)" -o dist/windows/amd64/$(NAME).exe ./bin
+	mkdir -p dist/linux/amd64 && GOOS=linux GOARCH=amd64 go build -a -ldflags "$(LDFLAGS)" -o dist/linux/amd64/$(NAME) ./bin
+	mkdir -p dist/linux/armhf && GOOS=linux GOARCH=arm GOARM=6 go build -a -ldflags "$(LDFLAGS)" -o dist/linux/armhf/$(NAME) ./bin
+	mkdir -p dist/darwin/amd64 && GOOS=darwin GOARCH=amd64 go build -a -ldflags "$(LDFLAGS)" -o dist/darwin/amd64/$(NAME) ./bin
+	mkdir -p dist/windows/amd64 && CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -a -ldflags "$(LDFLAGS)" -o dist/windows/amd64/$(NAME).exe ./bin
 	tar -cvzf release/$(NAME)-$(VERSION)-Linux-x86_64.tar.gz -C dist/linux/amd64 $(NAME)
 	cd $(shell pwd)/release && md5sum $(NAME)-$(VERSION)-Linux-x86_64.tar.gz > $(NAME)-$(VERSION)-Linux-x86_64.tar.gz.md5
 	tar -cvzf release/$(NAME)-$(VERSION)-Linux-armv7l.tar.gz -C dist/linux/armhf $(NAME)
