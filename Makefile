@@ -18,7 +18,7 @@ build:
 	go build -a -ldflags "$(LDFLAGS)" -o build/$(NAME)-$(BUILD) ./bin
 
 tag-release:
-	git tag -f `cat VERSION`
+	git tag -f $(VERSION)
 	git push -f origin master --tags
 
 deps:
@@ -35,24 +35,15 @@ test: lint vet
 	@go test $$(go list ./... 2> /dev/null | grep -v /vendor/)
 
 dist-clean:
-	rm -rf dist
 	rm -rf release
 
 dist: dist-clean
 	mkdir -p release
-	mkdir -p dist
-	mkdir -p dist/linux/amd64 && GOOS=linux GOARCH=amd64 go build -a -ldflags "$(LDFLAGS)" -o dist/linux/amd64/$(NAME) ./bin
-	mkdir -p dist/linux/armhf && GOOS=linux GOARCH=arm GOARM=6 go build -a -ldflags "$(LDFLAGS)" -o dist/linux/armhf/$(NAME) ./bin
-	mkdir -p dist/darwin/amd64 && GOOS=darwin GOARCH=amd64 go build -a -ldflags "$(LDFLAGS)" -o dist/darwin/amd64/$(NAME) ./bin
-	mkdir -p dist/windows/amd64 && CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -a -ldflags "$(LDFLAGS)" -o dist/windows/amd64/$(NAME).exe ./bin
-	tar -cvzf release/$(NAME)-$(VERSION)-Linux-x86_64.tar.gz -C dist/linux/amd64 $(NAME)
-	cd $(shell pwd)/release && md5sum $(NAME)-$(VERSION)-Linux-x86_64.tar.gz > $(NAME)-$(VERSION)-Linux-x86_64.tar.gz.md5
-	tar -cvzf release/$(NAME)-$(VERSION)-Linux-armv7l.tar.gz -C dist/linux/armhf $(NAME)
-	cd $(shell pwd)/release && md5sum $(NAME)-$(VERSION)-Linux-armv7l.tar.gz > $(NAME)-$(VERSION)-Linux-armv7l.tar.gz.md5
-	tar -cvzf release/$(NAME)-$(VERSION)-Darwin-x86_64.tar.gz -C dist/darwin/amd64 $(NAME)
-	cd $(shell pwd)/release && md5sum $(NAME)-$(VERSION)-Darwin-x86_64.tar.gz > $(NAME)-$(VERSION)-Darwin-x86_64.tar.gz.md5
-	tar -cvzf release/$(NAME)-$(VERSION)-Windows-x86_64.tar.gz -C dist/windows/amd64 $(NAME).exe
-	cd $(shell pwd)/release && md5sum $(NAME)-$(VERSION)-Windows-x86_64.tar.gz > $(NAME)-$(VERSION)-Windows-x86_64.tar.gz.md5
+	GOOS=linux GOARCH=amd64 go build -a -ldflags "$(LDFLAGS)" -o release/$(NAME)-Linux-x86_64 ./bin
+	GOOS=linux GOARCH=arm GOARM=6 go build -a -ldflags "$(LDFLAGS)" -o release/$(NAME)-Linux-armhf ./bin
+	GOOS=darwin GOARCH=amd64 go build -a -ldflags "$(LDFLAGS)" -o release/$(NAME)-Darwin-x86_64 ./bin
+	CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -a -ldflags "$(LDFLAGS)" -o release/$(NAME)-Windows-x86_64.exe ./bin
+	for file in release/$(NAME)-*; do openssl dgst -md5 < $${file} > $${file}.md5; done
 
 release: dist
-	ghr -u janeczku -r docker-machine-vultr --replace $(VERSION) release/
+	ghr -u janeczku -r docker-machine-vultr -b $$(cat md5sums.txt) --replace $(VERSION) release/

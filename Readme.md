@@ -22,12 +22,25 @@ Provision [Vultr](https://www.vultr.com/) cloud instances using the `docker-mach
 
 ## Installation
 
-Prerequisites:
+You need to have installed [Docker Machine](https://github.com/docker/machine/releases) v0.5.1 or later.
 
-[Docker Machine >= 0.5.1](https://github.com/docker/machine/releases) (v0.9.0 or later is recommended)
+Download the Vultr driver matching your platform from the [release page](https://github.com/janeczku/docker-machine-vultr/releases).
 
-Download the release tarball matching your platform/architecture from the release page.
-Extract the tarball and copy `docker-machine-driver-vultr` to a folder in your `PATH` and make sure it's executable.
+If you are running on **macOS**:
+
+    ```console
+    $ curl -L https://github.com/janeczku/docker-machine-vultr/releases/download/v1.3.0/docker-machine-driver-vultr-`uname -s`-`uname -m` \
+    >/usr/local/bin/docker-machine-driver-vultr && chmod +x /usr/local/bin/docker-machine-driver-vultr
+    ```
+
+If you are running on **Linux**:
+
+    ```console
+    $ curl -L https://github.com/janeczku/docker-machine-vultr/releases/download/v1.3.0/docker-machine-driver-vultr-`uname -s`-`uname -m` \
+    >/tmp/docker-machine-driver-vultr && chmod +x /tmp/docker-machine-driver-vultr && sudo cp /tmp/docker-machine /usr/local/bin/docker-machine
+    ```
+
+Otherwise, download the binary from the release page directly.
 
 ## Usage instructions
 
