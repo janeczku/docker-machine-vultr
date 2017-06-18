@@ -28,17 +28,18 @@ Download the Vultr driver matching your platform from the [release page](https:/
 
 If you are running on **macOS**:
 
-    ```console
-    $ curl -L https://github.com/janeczku/docker-machine-vultr/releases/download/v1.3.0/docker-machine-driver-vultr-`uname -s`-`uname -m` \
-    >/usr/local/bin/docker-machine-driver-vultr && chmod +x /usr/local/bin/docker-machine-driver-vultr
-    ```
+```console
+$ curl -L https://github.com/janeczku/docker-machine-vultr/releases/download/v1.3.0/docker-machine-driver-vultr-`uname -s`-`uname -m` \
+  -o /usr/local/bin/docker-machine-driver-vultr && chmod +x /usr/local/bin/docker-machine-driver-vultr
+```
 
 If you are running on **Linux**:
 
-    ```console
-    $ curl -L https://github.com/janeczku/docker-machine-vultr/releases/download/v1.3.0/docker-machine-driver-vultr-`uname -s`-`uname -m` \
-    >/tmp/docker-machine-driver-vultr && chmod +x /tmp/docker-machine-driver-vultr && sudo cp /tmp/docker-machine /usr/local/bin/docker-machine
-    ```
+```console
+$ curl -L https://github.com/janeczku/docker-machine-vultr/releases/download/v1.3.0/docker-machine-driver-vultr-`uname -s`-`uname -m` \
+  -o /tmp/docker-machine-driver-vultr && chmod +x /tmp/docker-machine-driver-vultr &&
+  sudo cp /tmp/docker-machine-driver-vultr /usr/local/bin/docker-machine-driver-vultr
+```
 
 Otherwise, download the binary from the release page directly.
 

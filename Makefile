@@ -46,4 +46,4 @@ dist: dist-clean
 	for file in release/$(NAME)-*; do openssl dgst -md5 < $${file} > $${file}.md5; done
 
 release: dist
-	ghr -u janeczku -r docker-machine-vultr -b $$(cat md5sums.txt) --replace $(VERSION) release/
+	ghr -u janeczku -r docker-machine-vultr --replace $(VERSION) release/
