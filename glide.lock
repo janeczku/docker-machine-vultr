@@ -1,12 +1,12 @@
-hash: 46040e93c697f75645748e2dd93530e6edbacfc84be790c52918265a05bbb664
-updated: 2017-06-18T23:18:53.717448962+02:00
+hash: bb27c90c14e7164e5253971fe277b0394c2d59da6dbf87e751b6e80b7396bcdf
+updated: 2017-07-21T13:28:26.782410889+12:00
 imports:
 - name: github.com/docker/docker
   version: a8a31eff10544860d2188dddabdee4d727545796
   subpackages:
   - pkg/term
 - name: github.com/docker/machine
-  version: 45c69ad1676da683308960e6998e5c38a7dbba2c
+  version: 937160559e02cc430fe176991beb9a6ffbfe3de0
   subpackages:
   - libmachine/drivers
   - libmachine/drivers/plugin
@@ -20,7 +20,7 @@ imports:
   - libmachine/version
   - version
 - name: github.com/JamesClonk/vultr
-  version: 253a3520b6e35123fe5879eb057b1599426b6a2a
+  version: 743eb4ae7f548cb4da4e55b9e5a2c9077125bd82
   subpackages:
   - lib
 - name: github.com/juju/ratelimit
