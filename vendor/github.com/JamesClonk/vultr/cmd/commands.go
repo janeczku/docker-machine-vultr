@@ -30,6 +30,7 @@ func (c *CLI) RegisterCommands() {
 		cmd.Command("group", "show and change firewall groups", func(cmd *cli.Cmd) {
 			cmd.Command("create", "create a firewall group", firewallGroupCreate)
 			cmd.Command("delete", "delete a firewall group", firewallGroupDelete)
+			cmd.Command("set-description", "set firewall group description", firewallGroupSetDescription)
 			cmd.Command("list", "list all firewall groups", firewallGroupList)
 		})
 		cmd.Command("rule", "show and change firewall rules", func(cmd *cli.Cmd) {
@@ -73,6 +74,7 @@ func (c *CLI) RegisterCommands() {
 	c.Command("server", "modify virtual machines", func(cmd *cli.Cmd) {
 		cmd.Command("create", "create a new virtual machine", serversCreate)
 		cmd.Command("rename", "rename a virtual machine", serversRename)
+		cmd.Command("tag", "tag a virtual machine", serversTag)
 		cmd.Command("start", "start a virtual machine (restart if already running)", serversStart)
 		cmd.Command("halt", "halt a virtual machine (hard power off)", serversHalt)
 		cmd.Command("reboot", "reboot a virtual machine (hard reboot)", serversReboot)
@@ -96,6 +98,8 @@ func (c *CLI) RegisterCommands() {
 		cmd.Command("show", "show detailed information of a virtual machine", serversShow)
 		// ip information
 		cmd.Command("list-ipv4", "list IPv4 information of a virtual machine", ipv4List)
+		cmd.Command("create-ipv4", "add a new IPv4 address to a virtual machine", ipv4Create)
+		cmd.Command("delete-ipv4", "remove IPv4 address from a virtual machine", ipv4Delete)
 		cmd.Command("list-ipv6", "list IPv6 information of a virtual machine", ipv6List)
 		// reverse dns
 		cmd.Command("reverse-dns", "modify reverse DNS entries", func(cmd *cli.Cmd) {
@@ -105,6 +109,9 @@ func (c *CLI) RegisterCommands() {
 			cmd.Command("delete-ipv6", "delete IPv6 reverse DNS entry", reverseIpv6Delete)
 			cmd.Command("list-ipv6", "list IPv6 reverse DNS entries of a virtual machine", reverseIpv6List)
 		})
+		// firewall groups
+		cmd.Command("set-firewall-group", "set firewall group of a virtual machine", serversSetFirewallGroup)
+		cmd.Command("unset-firewall-group", "remove virtual machine from firewall group", serversUnsetFirewallGroup)
 	})
 	c.Command("servers", "list all active or pending virtual machines on current account", serversList)
 

@@ -296,6 +296,23 @@ func Test_Servers_RenameServer_OK(t *testing.T) {
 	assert.Nil(t, client.RenameServer("123456789", "new-name"))
 }
 
+func Test_Servers_TagServer_Error(t *testing.T) {
+	server, client := getTestServerAndClient(http.StatusNotAcceptable, `{error}`)
+	defer server.Close()
+
+	err := client.TagServer("123456789", "new-tag")
+	if assert.NotNil(t, err) {
+		assert.Equal(t, `{error}`, err.Error())
+	}
+}
+
+func Test_Servers_TagServer_OK(t *testing.T) {
+	server, client := getTestServerAndClient(http.StatusOK, `{no-response?!}`)
+	defer server.Close()
+
+	assert.Nil(t, client.TagServer("123456789", "new-tag"))
+}
+
 func Test_Servers_StartServer_Error(t *testing.T) {
 	server, client := getTestServerAndClient(http.StatusNotAcceptable, `{error}`)
 	defer server.Close()
@@ -379,6 +396,40 @@ func Test_Servers_DeleteServer_OK(t *testing.T) {
 	defer server.Close()
 
 	assert.Nil(t, client.DeleteServer("123456789"))
+}
+
+func Test_Servers_SetFirewallGroup_Error(t *testing.T) {
+	server, client := getTestServerAndClient(http.StatusNotAcceptable, `{error}`)
+	defer server.Close()
+
+	err := client.SetFirewallGroup("123456789", "123456789")
+	if assert.NotNil(t, err) {
+		assert.Equal(t, `{error}`, err.Error())
+	}
+}
+
+func Test_Servers_SetFirewallGroup_OK(t *testing.T) {
+	server, client := getTestServerAndClient(http.StatusOK, `{no-response?!}`)
+	defer server.Close()
+
+	assert.Nil(t, client.SetFirewallGroup("123456789", "123456789"))
+}
+
+func Test_Servers_UnsetFirewallGroup_Error(t *testing.T) {
+	server, client := getTestServerAndClient(http.StatusNotAcceptable, `{error}`)
+	defer server.Close()
+
+	err := client.UnsetFirewallGroup("123456789")
+	if assert.NotNil(t, err) {
+		assert.Equal(t, `{error}`, err.Error())
+	}
+}
+
+func Test_Servers_UnsetFirewallGroup_OK(t *testing.T) {
+	server, client := getTestServerAndClient(http.StatusOK, `{no-response?!}`)
+	defer server.Close()
+
+	assert.Nil(t, client.UnsetFirewallGroup("123456789"))
 }
 
 func Test_Servers_ChangeOSofServer_Error(t *testing.T) {
