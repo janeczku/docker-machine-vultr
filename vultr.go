@@ -30,6 +30,7 @@ type Driver struct {
 	SSHKeyID          string
 	VultrPublicKey    string
 	ROSVersion        string
+	ReservedIP        string
 	IPv6              bool
 	Backups           bool
 	PrivateNetworking bool
@@ -113,6 +114,11 @@ func (d *Driver) GetCreateFlags() []mcnflag.Flag {
 			Name:   "vultr-ssh-key-id",
 			Usage:  "ID of an existing SSH key in your Vultr account.",
 		},
+		mcnflag.StringFlag{
+			EnvVar: "VULTR_RESERVED_IP",
+			Name:   "vultr-reserved-ip",
+			Usage:  "ID of a reserved IP in your Vultr account.",
+		},
 		mcnflag.BoolFlag{
 			EnvVar: "VULTR_IPV6",
 			Name:   "vultr-ipv6",
@@ -183,6 +189,7 @@ func (d *Driver) SetConfigFromFlags(flags drivers.DriverOptions) error {
 	d.PxeScriptID = flags.Int("vultr-pxe-script")
 	d.BootScriptID = flags.Int("vultr-boot-script")
 	d.SSHKeyID = flags.String("vultr-ssh-key-id")
+	d.ReservedIP = flags.String("vultr-reserved-ip")
 	d.IPv6 = flags.Bool("vultr-ipv6")
 	d.PrivateNetworking = flags.Bool("vultr-private-networking")
 	d.Backups = flags.Bool("vultr-backups")
@@ -327,6 +334,7 @@ func (d *Driver) Create() error {
 			DontNotifyOnActivate: true,
 			Tag:                  d.VultrTag,
 			FirewallGroupID:      d.FirewallGroupID,
+			ReservedIP:           d.ReservedIP,
 		})
 	if err != nil {
 		return err

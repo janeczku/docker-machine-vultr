@@ -70,7 +70,8 @@ Command line flags:
  - `--vultr-private-networking`: Enable private networking support for the VPS.
  - `--vultr-backups`: Enable automatic backups for the VPS.
  - `--vultr-userdata`: Path to file with cloud-init user-data.
- - `--vultr-snapshot-id`: Using snapshot to create host.
+ - `--vultr-snapshot-id`: ID of an existing Snapshot in your Vultr account.
+ - `--vultr-reserved-ip`: ID of a reserved IP in your Vultr account.
  - `--vultr-tag`: Tag to assign to the VPS.
  - `--vultr-firewall-group`: ID of existing firewall group to assign.
  - `--vultr-api-endpoint`: Override default Vultr API endpoint URL.
@@ -100,6 +101,7 @@ The operating system must support cloud-init and be configured to use the `ec2` 
 | `--vultr-backups`               | `VULTR_BACKUPS`              | `false`                     |
 | `--vultr-userdata`              | `VULTR_USERDATA`             | -                           |
 | `--vultr-snapshot-id`           | `VULTR_SNAPSHOT`             | -                           |
+| `--vultr-reserved-ip`           | `VULTR_RESERVED_IP`          | -                           |
 | `--vultr-tag`                   | `VULTR_TAG`                  | -                           |
 | `--vultr-firewall-group`        | `VULTR_FIREWALL_GROUP`       | -                           |
 | `--vultr-api-endpoint`          | `VULTR_API_ENDPOINT`         | -                           |
