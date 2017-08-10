@@ -29,6 +29,7 @@ func serversCreate(cmd *cli.Cmd) {
 	hostname := cmd.StringOpt("hostname", "", "Hostname to assign to this server")
 	tag := cmd.StringOpt("tag", "", "Tag to assign to this server")
 	appID := cmd.StringOpt("a app", "", "If launching an application (OSID 186), this is the APPID to launch")
+	reservedIP := cmd.StringOpt("ip", "", "IP address of the floating IP to use as the main IP of this server")
 	ipv6 := cmd.BoolOpt("ipv6", false, "Assign an IPv6 subnet to this virtual machine (where available)")
 	privateNetworking := cmd.BoolOpt("private-networking", false, "Add private networking support for this virtual machine")
 	autoBackups := cmd.BoolOpt("autobackups", false, "Enable automatic backups for this virtual machine")
@@ -41,6 +42,7 @@ func serversCreate(cmd *cli.Cmd) {
 			Script:               *script,
 			Snapshot:             *snapshot,
 			SSHKey:               *sshkey,
+			ReservedIP:           *reservedIP,
 			IPV6:                 *ipv6,
 			PrivateNetworking:    *privateNetworking,
 			AutoBackups:          *autoBackups,
@@ -80,6 +82,44 @@ func serversRename(cmd *cli.Cmd) {
 			log.Fatal(err)
 		}
 		fmt.Printf("Virtual machine renamed to: %v\n", *name)
+	}
+}
+
+func serversTag(cmd *cli.Cmd) {
+	cmd.Spec = "SUBID -t"
+	id := cmd.StringArg("SUBID", "", "SUBID of virtual machine (see <servers>)")
+	tag := cmd.StringOpt("t tag", "", "new tag for virtual machine")
+
+	cmd.Action = func() {
+		if err := GetClient().TagServer(*id, *tag); err != nil {
+			log.Fatal(err)
+		}
+		fmt.Printf("Virtual machine tagged with: %v\n", *tag)
+	}
+}
+
+func serversSetFirewallGroup(cmd *cli.Cmd) {
+	cmd.Spec = "SUBID GROUP_ID"
+	id := cmd.StringArg("SUBID", "", "SUBID of virtual machine (see <servers>)")
+	gid := cmd.StringArg("GROUP_ID", "", "Firewall group ID (see <firewall group list>)")
+
+	cmd.Action = func() {
+		if err := GetClient().SetFirewallGroup(*id, *gid); err != nil {
+			log.Fatal(err)
+		}
+		fmt.Printf("Virtual machine added to firewall group: %v\n", *gid)
+	}
+}
+
+func serversUnsetFirewallGroup(cmd *cli.Cmd) {
+	cmd.Spec = "SUBID"
+	id := cmd.StringArg("SUBID", "", "SUBID of virtual machine (see <servers>)")
+
+	cmd.Action = func() {
+		if err := GetClient().UnsetFirewallGroup(*id); err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println("Virtual machine removed from firewall group")
 	}
 }
 
@@ -377,6 +417,32 @@ func ipv4List(cmd *cli.Cmd) {
 			}, lengths)
 		}
 		tabsFlush()
+	}
+}
+
+func ipv4Create(cmd *cli.Cmd) {
+	cmd.Spec = "SUBID"
+	id := cmd.StringArg("SUBID", "", "SUBID of virtual machine (see <servers>)")
+	reboot := cmd.BoolOpt("r reboot", false, "reboot virtual machine after attaching IPv4 address")
+
+	cmd.Action = func() {
+		if err := GetClient().CreateIPv4(*id, *reboot); err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println("IPv4 address attached to virtual machine")
+	}
+}
+
+func ipv4Delete(cmd *cli.Cmd) {
+	cmd.Spec = "SUBID IP"
+	id := cmd.StringArg("SUBID", "", "SUBID of virtual machine (see <servers>)")
+	ip := cmd.StringArg("IP", "", "IPv4 of virtual machine (see <list-ipv4>)")
+
+	cmd.Action = func() {
+		if err := GetClient().DeleteIPv4(*id, *ip); err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println("IPv4 address deleted")
 	}
 }
 

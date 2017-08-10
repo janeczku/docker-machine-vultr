@@ -1,5 +1,5 @@
-hash: 46040e93c697f75645748e2dd93530e6edbacfc84be790c52918265a05bbb664
-updated: 2017-06-18T23:18:53.717448962+02:00
+hash: cd5ba72ca00f13f7ed17b9b5f6b90e448363ab4ce10e0a65459d462d0ba8569f
+updated: 2017-08-11T00:59:48.098189132+02:00
 imports:
 - name: github.com/docker/docker
   version: a8a31eff10544860d2188dddabdee4d727545796
@@ -20,7 +20,7 @@ imports:
   - libmachine/version
   - version
 - name: github.com/JamesClonk/vultr
-  version: 253a3520b6e35123fe5879eb057b1599426b6a2a
+  version: 2fd0705ce648e602e6c9c57329a174270a4f6688
   subpackages:
   - lib
 - name: github.com/juju/ratelimit
