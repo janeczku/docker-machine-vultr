@@ -245,7 +245,7 @@ func (d *Driver) PreCreateCheck() error {
 			return err
 		}
 
-		log.Info("Using existing SSH public key: %s", key.Name)
+		log.Infof("Using existing SSH public key: %s", key.Name)
 		d.VultrPublicKey = key.Key
 	}
 
