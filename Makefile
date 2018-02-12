@@ -15,7 +15,7 @@ all: build
 
 build:
 	mkdir -p build
-	go build -a -ldflags "$(LDFLAGS)" -o build/$(NAME)-$(BUILD) ./bin
+	go build -a -ldflags "$(LDFLAGS)" -o build/$(NAME)-$(BUILD) ./cmd/docker-machine-vultr
 
 tag-release:
 	git tag -f $(VERSION)

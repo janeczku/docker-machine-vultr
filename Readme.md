@@ -43,6 +43,13 @@ $ curl -L https://github.com/janeczku/docker-machine-vultr/releases/download/v1.
 
 Otherwise, download the binary from the release page directly.
 
+# Development version
+
+If you have your Go environment set up on your machine you can install latest version using `go-get`:
+```console
+$ go get -u github.com/janeczku/docker-machine-vultr/cmd/...
+```
+
 ## Usage instructions
 
 Grab your API key from the [Vultr control panel](https://my.vultr.com/settings/) and pass that to `docker-machine create` with the `--vultr-api-key` option.
