@@ -2,6 +2,15 @@
 
 
 [[projects]]
+  branch = "master"
+  name = "github.com/Azure/go-ansiterm"
+  packages = [
+    ".",
+    "winterm"
+  ]
+  revision = "d6e3b3328b783f23731bc4d058875b0371ff8109"
+
+[[projects]]
   name = "github.com/JamesClonk/vultr"
   packages = ["lib"]
   revision = "2fd0705ce648e602e6c9c57329a174270a4f6688"
@@ -12,12 +21,16 @@
   revision = "5215b55f46b2b919f50a1df0eaa5886afe4e3b3d"
 
 [[projects]]
+  branch = "master"
   name = "github.com/docker/docker"
-  packages = ["pkg/term"]
-  revision = "a8a31eff10544860d2188dddabdee4d727545796"
-  version = "v1.5.0"
+  packages = [
+    "pkg/term",
+    "pkg/term/windows"
+  ]
+  revision = "bf1345d0b6d91f24e06d05e741897bc83cf8bab4"
 
 [[projects]]
+  branch = "master"
   name = "github.com/docker/machine"
   packages = [
     "libmachine/drivers",
@@ -32,8 +45,7 @@
     "libmachine/version",
     "version"
   ]
-  revision = "45c69ad1676da683308960e6998e5c38a7dbba2c"
-  version = "v0.12.0"
+  revision = "e0e4da5ac71b78a97b711d6a6c1e6e542e1ca1ed"
 
 [[projects]]
   name = "github.com/juju/ratelimit"
@@ -47,22 +59,42 @@
   version = "v1.0.0"
 
 [[projects]]
+  name = "github.com/sirupsen/logrus"
+  packages = ["."]
+  revision = "d682213848ed68c0a260ca37d6dd5ace8423f5ba"
+  version = "v1.0.4"
+
+[[projects]]
   name = "github.com/stretchr/testify"
   packages = ["assert"]
   revision = "f6abca593680b2315d2075e0f5e2a9751e3f431a"
 
 [[projects]]
+  branch = "master"
   name = "golang.org/x/crypto"
   packages = [
     "curve25519",
+    "ed25519",
+    "ed25519/internal/edwards25519",
+    "internal/chacha20",
+    "poly1305",
     "ssh",
     "ssh/terminal"
   ]
-  revision = "1f22c0103821b9390939b6776727195525381532"
+  revision = "9de5f2eaf759b4c4550b3db39fed2e9e5f86f45c"
+
+[[projects]]
+  branch = "master"
+  name = "golang.org/x/sys"
+  packages = [
+    "unix",
+    "windows"
+  ]
+  revision = "37707fdb30a5b38865cfb95e5aab41707daec7fd"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "ff2dc2ee155c8d31a0d4799b34289995f8da97a446e5da49249f1331e12c1f31"
+  inputs-digest = "2f6cb4c555a7741ffa6349509878d16809cb3d13982c73f4a070a0dabd9caba1"
   solver-name = "gps-cdcl"
   solver-version = 1
