@@ -25,6 +25,7 @@ type Driver struct {
 	MachineID         string
 	PrivateIP         string
 	OSID              int
+	AppID		string
 	RegionID          int
 	PlanID            int
 	SSHKeyID          string
@@ -92,6 +93,11 @@ func (d *Driver) GetCreateFlags() []mcnflag.Flag {
 			Name:   "vultr-os-id",
 			Usage:  "Vultr operating system ID. Default: RancherOS.",
 			Value:  defaultOS,
+		},
+		mcnflag.StringFlag{
+			EnvVar: "VULTR_APP",
+			Name:   "vultr-app-id",
+			Usage:  "Vultr App ID. When using Application OS(ID:186).",
 		},
 		mcnflag.StringFlag{
 			EnvVar: "VULTR_ROS_VERSION",
@@ -183,6 +189,7 @@ func (d *Driver) SetConfigFromFlags(flags drivers.DriverOptions) error {
 	d.APIKey = flags.String("vultr-api-key")
 	d.APIEndpoint = flags.String("vultr-api-endpoint")
 	d.OSID = flags.Int("vultr-os-id")
+	d.AppID = flags.String("vultr-app-id")
 	d.ROSVersion = flags.String("vultr-ros-version")
 	d.RegionID = flags.Int("vultr-region-id")
 	d.PlanID = flags.Int("vultr-plan-id")
@@ -217,6 +224,14 @@ func (d *Driver) PreCreateCheck() error {
 		if _, err := os.Stat(d.UserDataFile); os.IsNotExist(err) {
 			return fmt.Errorf("Unable to find user data file at %s", d.UserDataFile)
 		}
+	}
+	
+	if d.OSID != 186 && d.AppID != "" {
+		return fmt.Errorf("--vultr-app-id only valid when using --vultr-os-id=186")	
+	}
+
+	if d.OSID == 186 && d.AppID == "" {
+		return fmt.Errorf("--vultr-os-id=186 requires --vultr-app-id")	
 	}
 
 	log.Info("Validating Vultr VPS parameters...")
@@ -329,6 +344,7 @@ func (d *Driver) Create() error {
 			AutoBackups:          d.Backups,
 			Script:               scriptID,
 			UserData:             userdata,
+			AppID:			d.AppID,
 			Snapshot:             d.SnapshotID,
 			Hostname:             d.MachineName,
 			DontNotifyOnActivate: true,

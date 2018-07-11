@@ -62,6 +62,7 @@ Command line flags:
  - `--vultr-region-id`: Region the VPS will be created in (DCID). See [available Region IDs](https://www.vultr.com/api/#regions_region_list).
  - `--vultr-plan-id`: Plan to use for this VPS (VPSPLANID). See [available Plan IDs](https://www.vultr.com/api/#plans_plan_list).
  - `--vultr-os-id`: Operating system ID to use (OSID). See [available OS IDs](https://www.vultr.com/api/#os_os_list).
+ - `--vultr-app-id`: Vultr application ID to use with 'Application OS' ('--vultr-os-id=186').
  - `--vultr-ros-version`: RancherOS version to use if an OSID was not specified (e.g. 'v1.0.1', 'latest').
  - `--vultr-pxe-script`: PXE script ID. Requires the 'Custom OS' ('--vultr-os-id=159')
  - `--vultr-boot-script`: Boot script ID. Mutually exclusive of '--vultr-pxe-script'.
