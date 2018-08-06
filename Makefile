@@ -40,6 +40,7 @@ dist-clean:
 dist: dist-clean
 	mkdir -p release
 	GOOS=linux GOARCH=amd64 go build -a -ldflags "$(LDFLAGS)" -o release/$(NAME)-Linux-x86_64 ./bin
+        GOOS=linux GOARCH=386 go build -a -ldflags "$(LDFLAGS)" -o release/$(NAME)-Linux-i386 ./bin
 	GOOS=linux GOARCH=arm GOARM=6 go build -a -ldflags "$(LDFLAGS)" -o release/$(NAME)-Linux-armhf ./bin
 	GOOS=darwin GOARCH=amd64 go build -a -ldflags "$(LDFLAGS)" -o release/$(NAME)-Darwin-x86_64 ./bin
 	CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -a -ldflags "$(LDFLAGS)" -o release/$(NAME)-Windows-x86_64.exe ./bin
